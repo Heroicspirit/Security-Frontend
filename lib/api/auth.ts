@@ -81,3 +81,39 @@ export const resetPassword = async (token: string, newPassword: string) => {
         throw new Error(error.response?.data?.message || error.message || 'Reset password failed');
     }
 }
+
+export const generateMfaSecret = async () => {
+    try {
+        const response = await axios.post(API.AUTH.MFA_GENERATE_SECRET);
+        return response.data;
+    } catch (error: Error | any) {
+        throw new Error(error.response?.data?.message || error.message || 'Failed to generate MFA secret');
+    }
+}
+
+export const enableMfa = async (token: string) => {
+    try {
+        const response = await axios.post(API.AUTH.MFA_ENABLE, { token });
+        return response.data;
+    } catch (error: Error | any) {
+        throw new Error(error.response?.data?.message || error.message || 'Failed to enable MFA');
+    }
+}
+
+export const verifyMfa = async (token: string) => {
+    try {
+        const response = await axios.post(API.AUTH.MFA_VERIFY, { token });
+        return response.data;
+    } catch (error: Error | any) {
+        throw new Error(error.response?.data?.message || error.message || 'Failed to verify MFA token');
+    }
+}
+
+export const disableMfa = async () => {
+    try {
+        const response = await axios.post(API.AUTH.MFA_DISABLE);
+        return response.data;
+    } catch (error: Error | any) {
+        throw new Error(error.response?.data?.message || error.message || 'Failed to disable MFA');
+    }
+}

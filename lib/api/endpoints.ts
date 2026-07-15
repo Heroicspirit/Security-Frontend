@@ -6,6 +6,10 @@ export const API = {
         UPDATEPROFILE: '/api/auth/update-profile',
         REQUEST_PASSWORD_RESET: '/api/auth/request-password-reset',
         RESET_PASSWORD: (token: string) => `/api/auth/reset-password/${token}`,
+        MFA_GENERATE_SECRET: '/api/auth/mfa/generate-secret',
+        MFA_ENABLE: '/api/auth/mfa/enable',
+        MFA_VERIFY: '/api/auth/mfa/verify',
+        MFA_DISABLE: '/api/auth/mfa/disable',
     },
     PRODUCTS: {
         GET_ALL: '/api/products',

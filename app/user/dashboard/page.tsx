@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShoppingCart, ArrowRight, Clock, CheckCircle2, X } from "lucide-react";
+import { ShoppingCart, ArrowRight, Clock, CheckCircle2, X, Settings } from "lucide-react";
 import Header from "../_components/Header";
+import MfaSettings from "../_components/MfaSettings";
 import Link from "next/link";
 import { getFeaturedProducts } from "@/lib/api/products";
 
@@ -10,6 +11,7 @@ export default function UserDashboardPage() {
   const [showToast, setShowToast] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showMfaSettings, setShowMfaSettings] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -37,7 +39,22 @@ export default function UserDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0f1115] flex flex-col">
-      <Header />
+      <Header onOpenMfaSettings={() => setShowMfaSettings(true)} />
+      
+      {/* MFA Settings Modal */}
+      {showMfaSettings && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#141822] border border-slate-800 rounded-2xl w-full max-w-lg p-6 relative">
+            <button
+              onClick={() => setShowMfaSettings(false)}
+              className="absolute top-4 right-4 text-slate-500 hover:text-slate-300 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <MfaSettings />
+          </div>
+        </div>
+      )}
       <main className="flex-1 pb-16">
       
       {/* SUCCESS FLOATING TOAST NOTIFICATION */}
