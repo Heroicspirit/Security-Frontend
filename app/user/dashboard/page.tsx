@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ShoppingCart, ArrowRight, Clock, CheckCircle2, X, Settings } from "lucide-react";
+import { ShoppingCart, ArrowRight, Clock, CheckCircle2, X } from "lucide-react";
 import Header from "../_components/Header";
-import MfaSettings from "../_components/MfaSettings";
 import Link from "next/link";
 import { getFeaturedProducts } from "@/lib/api/products";
 
@@ -11,7 +10,6 @@ export default function UserDashboardPage() {
   const [showToast, setShowToast] = useState(false);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showMfaSettings, setShowMfaSettings] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -39,31 +37,16 @@ export default function UserDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0f1115] flex flex-col">
-      <Header onOpenMfaSettings={() => setShowMfaSettings(true)} />
-      
-      {/* MFA Settings Modal */}
-      {showMfaSettings && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#141822] border border-slate-800 rounded-2xl w-full max-w-lg p-6 relative">
-            <button
-              onClick={() => setShowMfaSettings(false)}
-              className="absolute top-4 right-4 text-slate-500 hover:text-slate-300 transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <MfaSettings />
-          </div>
-        </div>
-      )}
+      <Header />
       <main className="flex-1 pb-16">
       
       {/* SUCCESS FLOATING TOAST NOTIFICATION */}
       {showToast && (
         <div className="fixed top-6 right-6 z-50 bg-[#1f2635] border border-slate-800 rounded-xl p-4 shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
-          <CheckCircle2 className="w-5 h-5 text-blue-400 shrink-0" />
+          <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
           <div className="text-left pr-4">
-            <p className="text-xs font-bold text-white">Added to cart successfully!</p>
-            <p className="text-[11px] text-slate-400">1 item added to your selection</p>
+            <p className="text-xs font-bold text-white">Plant added to cart!</p>
+            <p className="text-[11px] text-slate-400">Your favorite plant is waiting for checkout.</p>
           </div>
           <button 
             onClick={() => setShowToast(false)} 
@@ -73,6 +56,7 @@ export default function UserDashboardPage() {
           </button>
         </div>
       )}
+
       {/* HERO SECTION */}
       <section className="relative bg-gradient-to-b from-[#131722] to-[#0f1115] py-20 lg:py-32 overflow-hidden">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -84,13 +68,13 @@ export default function UserDashboardPage() {
               Artisan floral arrangements and rare botanical collections delivered with care. Elevate your space with nature's finest artistry.
             </p>
             <div>
-              <button className="bg-blue-400 hover:bg-blue-500 text-slate-950 font-semibold px-6 py-3 rounded-full transition shadow-lg shadow-blue-400/20">
-                Shop
-              </button>
+              <Link href="/user/plants" className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-full transition shadow-lg shadow-green-600/20">
+                Shop Selection
+              </Link>
             </div>
           </div>
           <div className="lg:col-span-6 relative flex justify-center">
-            <div className="absolute inset-0 bg-blue-500/10 blur-[120px] rounded-full max-w-md mx-auto"></div>
+            <div className="absolute inset-0 bg-green-600/10 blur-[120px] rounded-full max-w-md mx-auto"></div>
             <img 
               src="/images/flower.webp" 
               alt="Flower Profile" 
@@ -105,52 +89,44 @@ export default function UserDashboardPage() {
         <h2 className="text-2xl font-bold mb-8 text-white">Shop by Category</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Big Card - Bouquets */}
-          <div className="md:col-span-5 group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/40 to-transparent border border-slate-800 h-[380px] flex items-end p-6">
-            <img
-              src="https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&q=80"
-              alt="Flower Bouquets"
-              className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500"
+          {/* Big Card: Bouquets */}
+          <Link href="/user/Bouquets" className="md:col-span-5 group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/80 to-transparent border border-slate-800 h-[380px] flex items-end p-6 cursor-pointer">
+            <img 
+              src="https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&q=80" 
+              alt="Flower Bouquets" 
+              className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500 brightness-[0.65]" 
             />
             <div className="space-y-1">
-              <h3 className="text-xl font-bold text-white">
-                Bouquets
-              </h3>
-              <p className="text-sm text-slate-400">
-                Fresh handcrafted flower bouquets
-              </p>
+              <h3 className="text-xl font-bold text-white">Bouquets</h3>
+              <p className="text-sm text-slate-400">Fresh handcrafted flower bouquets</p>
             </div>
-          </div>
+          </Link>
 
-          {/* Right */}
+          {/* Split Container Right */}
           <div className="md:col-span-7 flex flex-col gap-6">
-            {/* Plants */}
-            <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/40 to-transparent border border-slate-800 h-[178px] flex items-end p-6">
-              <img
-                src="/images/plants.webp"
-                alt="Indoor Plants"
-                className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500"
+            {/* Top Row: Plants */}
+            <Link href="/user/plants" className="group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/80 to-transparent border border-slate-800 h-[178px] flex items-end p-6 cursor-pointer">
+              <img 
+                src="/images/plants.webp" 
+                alt="Indoor Plants" 
+                className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500 brightness-[0.55]" 
               />
-              <div>
-                <h3 className="text-lg font-bold text-white">
-                  Plants
-                </h3>
+              <div className="space-y-0.5">
+                <h3 className="text-lg font-bold text-white">Plants</h3>
               </div>
-            </div>
+            </Link>
 
-            {/* Roses */}
-            <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/40 to-transparent border border-slate-800 h-[178px] flex items-end p-6">
-              <img
-                src="https://images.unsplash.com/photo-1609630875171-b1321377ee65?w=800&q=80"
-                alt="Fresh Roses"
-                className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500"
+            {/* Bottom Row: Roses */}
+            <Link href="/user/roses" className="group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/80 to-transparent border border-slate-800 h-[178px] flex items-end p-6 cursor-pointer">
+              <img 
+                src="https://images.unsplash.com/photo-1609630875171-b1321377ee65?w=800&q=80" 
+                alt="Fresh Roses" 
+                className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500 brightness-[0.5]" 
               />
-              <div>
-                <h3 className="text-lg font-bold text-white">
-                  Roses
-                </h3>
+              <div className="space-y-0.5">
+                <h3 className="text-lg font-bold text-white">Roses</h3>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
@@ -162,9 +138,9 @@ export default function UserDashboardPage() {
             <h2 className="text-2xl font-bold text-white">Popular Products</h2>
             <p className="text-sm text-slate-400 mt-1">Handpicked floral arrangements for every occasion.</p>
           </div>
-          <a href="#" className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 font-medium group transition">
+          <Link href="/user/plants" className="text-sm text-green-400 hover:text-green-300 flex items-center gap-1 font-medium group transition">
             View All Products <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-          </a>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -172,22 +148,22 @@ export default function UserDashboardPage() {
             <div key={product._id || product.id} className="group bg-[#141822] border border-slate-800/60 rounded-2xl overflow-hidden p-4 flex flex-col justify-between hover:border-slate-700 transition">
               <div className="relative aspect-square w-full rounded-xl bg-slate-950 overflow-hidden mb-4 flex items-center justify-center">
                 <span className="absolute top-2 left-2 bg-slate-900/80 backdrop-blur-md text-[10px] font-bold text-slate-400 px-2 py-0.5 rounded-full border border-slate-800">
-                  {product.brand}
+                  {product.type || product.category}
                 </span>
                 <img src={product.image?.startsWith('http') ? product.image : `http://localhost:5001${product.image}`} alt={product.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-300" />
               </div>
               <div className="space-y-1">
-                <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">{product.category}</p>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">{product.type || product.category}</p>
                 <h3 className="text-sm font-semibold text-slate-200 line-clamp-2 min-h-[40px] group-hover:text-white transition">{product.title}</h3>
                 {product.stock > 0 && (
                   <span className="inline-block bg-slate-800/60 text-slate-400 text-[10px] font-medium px-2 py-0.5 rounded mt-1">
-                    In Stock ({product.stock})
+                    Available ({product.stock})
                   </span>
                 )}
               </div>
               <div className="flex items-center justify-between pt-4 mt-2 border-t border-slate-800/40">
                 <span className="text-base font-bold text-white">Rs {product.price}</span>
-                <button onClick={handleAddToCart} className="bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-white p-2 rounded-full transition duration-200">
+                <button onClick={handleAddToCart} className="bg-green-600/10 hover:bg-green-600 text-green-400 hover:text-white p-2 rounded-full transition duration-200">
                   <ShoppingCart className="w-4 h-4" />
                 </button>
               </div>
@@ -196,6 +172,40 @@ export default function UserDashboardPage() {
         </div>
       </section>
 
+      {/* FLASH SALE */}
+      <section className="max-w-7xl mx-auto px-6 py-12">
+        <div className="relative rounded-3xl bg-gradient-to-r from-[#17223b] via-[#111726] to-[#0f121d] border border-slate-800/80 p-8 sm:p-12 overflow-hidden flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="space-y-4 max-w-xl text-center lg:text-left">
+            <div className="flex items-center justify-center lg:justify-start gap-2 text-rose-400 font-semibold text-xs tracking-wider uppercase">
+              <Clock className="w-4 h-4 text-rose-400 animate-pulse" /> Flash Sale Ending Soon
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Up to 40% Off Rare Botanical Plants
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base">
+              Grab the best deals on premium indoor collections, exotic flowers, and plant maintenance essentials.
+            </p>
+            <div className="flex items-center justify-center lg:justify-start gap-3 pt-2">
+              {/* Countdown Blocks */}
+              {[
+                { val: "08", label: "Hours" },
+                { val: "42", label: "Mins" },
+                { val: "15", label: "Secs" },
+              ].map((timer, idx) => (
+                <div key={idx} className="flex flex-col items-center bg-slate-950/60 border border-slate-800 px-4 py-2 rounded-xl min-w-[64px]">
+                  <span className="text-xl font-bold text-white">{timer.val}</span>
+                  <span className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{timer.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="z-10 flex-shrink-0">
+            <button className="bg-green-600 hover:bg-green-700 text-white font-bold text-base px-8 py-4 rounded-full transition shadow-xl shadow-green-600/10">
+              Shop the Sale
+            </button>
+          </div>
+        </div>
+      </section>
       </main>
 
       {/* FOOTER */}
@@ -203,9 +213,9 @@ export default function UserDashboardPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="space-y-2 text-center sm:text-left">
             <div className="text-sm font-bold text-white tracking-tight">
-              Moto<span className="text-blue-400">Parts</span>
+              Plant<span className="text-green-400">Store</span>
             </div>
-            <p>© 2026 Flowers. All rights reserved.</p>
+            <p>© 2026 PlantStore. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -22,19 +22,19 @@ const MAX_PRICE = 2000;
 type SortOption = "default" | "priceHigh" | "priceLow";
 
 const SORT_LABELS: Record<SortOption, string> = {
-  default: "Featured",
+  default: "Featured Arrangements",
   priceHigh: "Highest Price",
   priceLow: "Lowest Price",
 };
 
-export default function BikePartsPage() {
+export default function BouquetsPage() {
   const router = useRouter();
   const { addToCart } = useCart();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<(string | number)[]>([]);
   const [showToast, setShowToast] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState<string>("");
+  const [selectedStyle, setSelectedStyle] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<number>(MAX_PRICE);
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
   const [sortOption, setSortOption] = useState<SortOption>("default");
@@ -47,12 +47,13 @@ export default function BikePartsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await getProductsByCategory('bikeparts');
+      // Fetching from the bouquets category
+      const response = await getProductsByCategory('bouquets');
       if (response.success) {
         setProducts(response.data || response.products || []);
       }
     } catch (error) {
-      console.error('Failed to fetch products:', error);
+      console.error('Failed to fetch bouquets:', error);
       setProducts([]);
     } finally {
       setLoading(false);
@@ -80,19 +81,18 @@ export default function BikePartsPage() {
   };
 
   const resetFilters = () => {
-    setSelectedBrand("");
+    setSelectedStyle("");
     setMaxPrice(MAX_PRICE);
     setInStockOnly(false);
   };
 
-  // Combined filters: brand, price range, and stock availability
+  // Combined filters: style, price range, and availability
   const filteredProducts = products.filter((product: any) => {
-    if (selectedBrand && product.brand?.toLowerCase() !== selectedBrand.toLowerCase()) {
+    if (selectedStyle && product.brand?.toLowerCase() !== selectedStyle.toLowerCase()) {
       return false;
     }
 
     const price = parseFloat(product.price);
-    // Treat MAX_PRICE as "no upper limit" (i.e. "Rs 2000+")
     if (maxPrice < MAX_PRICE && !isNaN(price) && price > maxPrice) {
       return false;
     }
@@ -104,14 +104,14 @@ export default function BikePartsPage() {
     return true;
   });
 
-  // Apply sorting on top of the filtered results (doesn't mutate the original array)
+  // Apply sorting
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     const priceA = parseFloat(a.price) || 0;
     const priceB = parseFloat(b.price) || 0;
 
     if (sortOption === "priceHigh") return priceB - priceA;
     if (sortOption === "priceLow") return priceA - priceB;
-    return 0; // "default" — keep original order
+    return 0; 
   });
 
   return (
@@ -122,10 +122,10 @@ export default function BikePartsPage() {
       {/* SUCCESS FLOATING TOAST NOTIFICATION */}
       {showToast && (
         <div className="fixed top-6 right-6 z-50 bg-[#1f2635] border border-slate-800 rounded-xl p-4 shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
-          <CheckCircle2 className="w-5 h-5 text-blue-400 shrink-0" />
+          <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
           <div className="text-left pr-4">
-            <p className="text-xs font-bold text-white">Added to cart successfully!</p>
-            <p className="text-[11px] text-slate-400">1 item added to your selection</p>
+            <p className="text-xs font-bold text-white">Added to bouquet selection!</p>
+            <p className="text-[11px] text-slate-400">Your beautiful arrangement has been added.</p>
           </div>
           <button 
             onClick={() => setShowToast(false)} 
@@ -145,22 +145,22 @@ export default function BikePartsPage() {
             <SlidersHorizontal className="w-4 h-4 text-slate-400" />
           </div>
 
-          {/* Brand Checklist */}
+          {/* Bouquet Style Checklist */}
           <div className="space-y-3">
             <div className="flex items-center justify-between cursor-pointer group">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Brand</span>
+              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Bouquet Style</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
             </div>
             <div className="space-y-2.5 pl-0.5">
-              {["Brembo", "Akrapovič", "Öhlins"].map((brand) => (
-                <label key={brand} className="flex items-center gap-3 text-xs text-slate-400 hover:text-slate-200 cursor-pointer select-none">
+              {["Classic Roses", "Mixed Blooms", "Premium Lilies", "Tulip Arrangements"].map((style) => (
+                <label key={style} className="flex items-center gap-3 text-xs text-slate-400 hover:text-slate-200 cursor-pointer select-none">
                   <input 
                     type="checkbox"
-                    checked={selectedBrand === brand}
-                    onChange={() => setSelectedBrand(prev => prev === brand ? "" : brand)}
-                    className="w-4 h-4 rounded border-slate-800 bg-[#111319] text-blue-500 focus:ring-0 accent-blue-500" 
+                    checked={selectedStyle === style}
+                    onChange={() => setSelectedStyle(prev => prev === style ? "" : style)}
+                    className="w-4 h-4 rounded border-slate-800 bg-[#111319] text-green-500 focus:ring-0 accent-green-600" 
                   />
-                  <span>{brand}</span>
+                  <span>{style}</span>
                 </label>
               ))}
             </div>
@@ -172,7 +172,7 @@ export default function BikePartsPage() {
               <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Price Range</span>
               <button
                 onClick={resetFilters}
-                className="text-[10px] font-semibold text-blue-400 hover:text-blue-300 transition"
+                className="text-[10px] font-semibold text-green-400 hover:text-green-300 transition"
               >
                 Show All
               </button>
@@ -185,7 +185,7 @@ export default function BikePartsPage() {
                 step={10}
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-full accent-blue-500 cursor-pointer"
+                className="w-full accent-green-600 cursor-pointer"
               />
               <div className="flex justify-between text-[11px] font-medium text-slate-500">
                 <span>Rs 0</span>
@@ -194,14 +194,14 @@ export default function BikePartsPage() {
             </div>
           </div>
 
-          {/* Compatibility Selector drop list */}
+          {/* Occasion Dropdown Selector */}
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Compatibility</span>
+              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Occasion</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
             </div>
             <button className="w-full bg-[#111319] border border-slate-800/80 rounded-xl px-3 py-2.5 flex items-center justify-between text-xs text-slate-400 hover:border-slate-700 transition">
-              <span>Select Bike Model</span>
+              <span>Select Occasion</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
             </button>
           </div>
@@ -217,7 +217,7 @@ export default function BikePartsPage() {
                 type="checkbox" 
                 checked={inStockOnly}
                 onChange={(e) => setInStockOnly(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-800 bg-[#111319] text-blue-500 focus:ring-0 accent-blue-500" 
+                className="w-4 h-4 rounded border-slate-800 bg-[#111319] text-green-500 focus:ring-0 accent-green-600" 
               />
               <span>In Stock</span>
             </label>
@@ -230,9 +230,9 @@ export default function BikePartsPage() {
           {/* List Toolbar Actions */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-900">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Bike Parts</h1>
+              <h1 className="text-2xl font-bold text-white tracking-tight">Handcrafted Bouquets</h1>
               <p className="text-xs text-slate-500 pt-0.5">
-                Showing {sortedProducts.length} of {products.length} results
+                Showing {sortedProducts.length} of {products.length} arrangements
               </p>
             </div>
 
@@ -249,12 +249,11 @@ export default function BikePartsPage() {
 
               {sortMenuOpen && (
                 <>
-                  {/* Backdrop to close menu on outside click */}
                   <div 
                     className="fixed inset-0 z-10" 
                     onClick={() => setSortMenuOpen(false)} 
                   />
-                  <div className="absolute top-full right-0 mt-2 w-40 bg-[#111319] border border-slate-800 rounded-xl overflow-hidden z-20 shadow-xl">
+                  <div className="absolute top-full right-0 mt-2 w-48 bg-[#111319] border border-slate-800 rounded-xl overflow-hidden z-20 shadow-xl">
                     {(Object.keys(SORT_LABELS) as SortOption[]).map((option) => (
                       <button
                         key={option}
@@ -264,7 +263,7 @@ export default function BikePartsPage() {
                         }}
                         className={`w-full text-left px-4 py-2.5 text-xs font-medium transition ${
                           sortOption === option 
-                            ? "bg-blue-500/10 text-blue-400" 
+                            ? "bg-green-500/10 text-green-400" 
                             : "text-slate-300 hover:bg-slate-800/60"
                         }`}
                       >
@@ -280,19 +279,19 @@ export default function BikePartsPage() {
           {/* Loading State */}
           {loading && (
             <div className="text-center text-slate-500 text-sm py-12">
-              Loading products...
+              Chasing down fresh blossoms...
             </div>
           )}
 
           {/* Empty State */}
           {!loading && sortedProducts.length === 0 && (
             <div className="flex flex-col items-center justify-center gap-4 text-center text-slate-500 text-sm py-12">
-              <span>No products found for the selected filters.</span>
+              <span>No arrangements found matching your filters.</span>
               <button
                 onClick={resetFilters}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold text-xs px-5 py-2.5 rounded-full transition"
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full transition"
               >
-                Show All Products
+                Show All Bouquets
               </button>
             </div>
           )}
@@ -311,12 +310,12 @@ export default function BikePartsPage() {
                     {/* Image Section Frame with Action Badge Layering */}
                     <div className="relative rounded-xl overflow-hidden aspect-square bg-[#0a0c10] flex items-center justify-center">
                       {product.tag && (
-                        <span className="absolute top-3 left-3 z-10 bg-blue-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
+                        <span className="absolute top-3 left-3 z-10 bg-green-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
                           {product.tag}
                         </span>
                       )}
                       {product.discount && (
-                        <span className="absolute top-3 left-3 z-10 bg-blue-500/20 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                        <span className="absolute top-3 left-3 z-10 bg-green-600/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-md">
                           {product.discount}
                         </span>
                       )}
@@ -350,7 +349,7 @@ export default function BikePartsPage() {
                         </h4>
                         {isOutOfStock ? (
                           <span className="inline-block bg-rose-950/60 text-rose-400 text-[10px] font-medium px-2 py-0.5 rounded mt-1">
-                            Out of Stock
+                            Sold Out
                           </span>
                         ) : (
                           <span className="inline-block bg-slate-800/60 text-slate-400 text-[10px] font-medium px-2 py-0.5 rounded mt-1">
@@ -378,8 +377,8 @@ export default function BikePartsPage() {
                               Out of Stock
                             </span>
                           ) : (
-                            <Link href={`/user/bikeparts/${productId}`} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-sm shadow-blue-500/5 text-center">
-                              Buy Now
+                            <Link href={`/user/bouquets/${productId}`} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-sm shadow-green-600/5 text-center">
+                              Order Now
                             </Link>
                           )}
                           <button 
@@ -404,7 +403,7 @@ export default function BikePartsPage() {
             <button className="p-2 bg-[#111319] border border-slate-900 rounded-xl text-slate-500 hover:text-slate-300 transition disabled:opacity-40" disabled>
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <button className="w-8 h-8 bg-blue-500 text-white font-bold text-xs rounded-xl flex items-center justify-center shadow-md shadow-blue-500/10">
+            <button className="w-8 h-8 bg-green-600 text-white font-bold text-xs rounded-xl flex items-center justify-center shadow-md shadow-green-600/10">
               1
             </button>
             <button className="w-8 h-8 bg-[#111319] border border-slate-900 text-slate-400 hover:text-slate-200 font-semibold text-xs rounded-xl flex items-center justify-center transition">
@@ -421,7 +420,6 @@ export default function BikePartsPage() {
         </div>
       </div>
       </main>
-
     </div>
   );
 }

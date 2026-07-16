@@ -17,14 +17,14 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { getProductsByCategory } from "@/lib/api/products";
 
-export default function RidingGearPage() {
+export default function PlantsPage() {
   const router = useRouter();
   const { addToCart } = useCart();
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<(string | number)[]>([]);
   const [showToast, setShowToast] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState<string>("Alpinestars");
+  const [selectedBrand, setSelectedBrand] = useState<string>("Indoor");
 
   useEffect(() => {
     fetchProducts();
@@ -33,7 +33,7 @@ export default function RidingGearPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await getProductsByCategory('ridinggear');
+      const response = await getProductsByCategory("plants");
       if (response.success) {
         setProducts(response.data || response.products || []);
       }
@@ -63,7 +63,7 @@ export default function RidingGearPage() {
     setTimeout(() => setShowToast(false), 3000);
   };
 
-  const handleBuyNow = (product: any) => {
+  const handleOrderNow = (product: any) => {
     addToCart({
       product: product._id || product.id,
       title: product.title,
@@ -74,11 +74,11 @@ export default function RidingGearPage() {
     router.push('/checkout');
   };
 
-  // Filter products by selected brand (case-insensitive, tolerant of missing brand field)
+  // Filter products by selected plant type (tolerant of missing category or type field)
   const filteredProducts = products.filter((product: any) => {
     if (!selectedBrand) return true;
-    if (!product.brand) return false;
-    return product.brand.toLowerCase() === selectedBrand.toLowerCase();
+    const targetType = product.type || product.category || "";
+    return targetType.toLowerCase() === selectedBrand.toLowerCase();
   });
 
   return (
@@ -89,10 +89,10 @@ export default function RidingGearPage() {
       {/* SUCCESS FLOATING TOAST NOTIFICATION */}
       {showToast && (
         <div className="fixed top-6 right-6 z-50 bg-[#1f2635] border border-slate-800 rounded-xl p-4 shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300">
-          <CheckCircle2 className="w-5 h-5 text-blue-400 shrink-0" />
+          <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
           <div className="text-left pr-4">
-            <p className="text-xs font-bold text-white">Added to cart successfully!</p>
-            <p className="text-[11px] text-slate-400">1 item added to your selection</p>
+            <p className="text-xs font-bold text-white">Plant added to cart!</p>
+            <p className="text-[11px] text-slate-400">Your favorite plant is waiting for checkout.</p>
           </div>
           <button 
             onClick={() => setShowToast(false)} 
@@ -112,20 +112,20 @@ export default function RidingGearPage() {
             <SlidersHorizontal className="w-4 h-4 text-slate-400" />
           </div>
 
-          {/* Brand Checklist */}
+          {/* Plant Type Checklist */}
           <div className="space-y-3">
             <div className="flex items-center justify-between cursor-pointer group">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Brand</span>
+              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Plant Type</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
             </div>
             <div className="space-y-2.5 pl-0.5">
-              {["Alpinestars", "Rev'it!", "Dainese"].map((brand) => (
+              {["Indoor", "Outdoor", "Succulents", "Air Purifying"].map((brand) => (
                 <label key={brand} className="flex items-center gap-3 text-xs text-slate-400 hover:text-slate-200 cursor-pointer select-none">
                   <input 
                     type="checkbox"
                     checked={selectedBrand === brand}
                     onChange={() => setSelectedBrand(prev => prev === brand ? "" : brand)}
-                    className="w-4 h-4 rounded border-slate-800 bg-[#111319] text-blue-500 focus:ring-0 accent-blue-500" 
+                    className="w-4 h-4 rounded border-slate-800 bg-[#111319] text-green-600 focus:ring-0 accent-green-500" 
                   />
                   <span>{brand}</span>
                 </label>
@@ -141,23 +141,23 @@ export default function RidingGearPage() {
             </div>
             <div className="space-y-2">
               <div className="h-1 w-full bg-slate-800 rounded-full relative">
-                <div className="absolute inset-y-0 left-0 right-0 bg-blue-500/30 rounded-full" />
+                <div className="absolute inset-y-0 left-0 right-0 bg-green-600/30 rounded-full" />
               </div>
               <div className="flex justify-between text-[11px] font-medium text-slate-500">
-                <span>$0</span>
-                <span>$2000+</span>
+                <span>Rs 500</span>
+                <span>Rs 15,000+</span>
               </div>
             </div>
           </div>
 
-          {/* Size Selector */}
+          {/* Pot Size Selector */}
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Size</span>
+              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Pot Size</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
             </div>
             <button className="w-full bg-[#111319] border border-slate-800/80 rounded-xl px-3 py-2.5 flex items-center justify-between text-xs text-slate-400 hover:border-slate-700 transition">
-              <span>Select Size</span>
+              <span>Select Pot Size</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
             </button>
           </div>
@@ -172,7 +172,7 @@ export default function RidingGearPage() {
               <input 
                 type="checkbox" 
                 defaultChecked 
-                className="w-4 h-4 rounded border-slate-800 bg-[#111319] text-blue-500 focus:ring-0 accent-blue-500" 
+                className="w-4 h-4 rounded border-slate-800 bg-[#111319] text-green-600 focus:ring-0 accent-green-500" 
               />
               <span>In Stock</span>
             </label>
@@ -185,7 +185,7 @@ export default function RidingGearPage() {
           {/* List Toolbar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-900">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Riding Gear</h1>
+              <h1 className="text-2xl font-bold text-white tracking-tight">Indoor Plants</h1>
               <p className="text-xs text-slate-500 pt-0.5">
                 Showing {filteredProducts.length} of {products.length} results
               </p>
@@ -222,18 +222,21 @@ export default function RidingGearPage() {
                 const productId = product._id || product.id;
                 const isFavorite = favorites.includes(productId);
 
+                // Safe fallback for customized tags if dynamic tag is missing
+                const displayTag = product.tag || (product.inStock ? "Best Seller" : "Low Maintenance");
+
                 return (
                   <div key={productId} className="group bg-[#111319] border border-slate-900 rounded-2xl p-4 flex flex-col justify-between space-y-4 hover:border-slate-800 transition duration-150">
                     
                     {/* Image Section */}
                     <div className="relative rounded-xl overflow-hidden aspect-square bg-[#0a0c10] flex items-center justify-center">
-                      {product.tag && (
-                        <span className="absolute top-3 left-3 z-10 bg-blue-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
-                          {product.tag}
+                      {displayTag && (
+                        <span className="absolute top-3 left-3 z-10 bg-green-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
+                          {displayTag}
                         </span>
                       )}
                       {product.discount && (
-                        <span className="absolute top-3 left-3 z-10 bg-blue-500/20 text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                        <span className="absolute top-3 left-3 z-10 bg-green-600/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-md">
                           {product.discount}
                         </span>
                       )}
@@ -260,7 +263,7 @@ export default function RidingGearPage() {
                     <div className="space-y-3 flex-1 flex flex-col justify-between">
                       <div className="space-y-1">
                         <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">
-                          {product.brand}
+                          {product.type || product.category}
                         </span>
                         <h4 className="text-sm font-semibold text-slate-200 line-clamp-2 leading-snug group-hover:text-white transition">
                           {product.title}
@@ -287,10 +290,10 @@ export default function RidingGearPage() {
 
                         <div className="flex items-center gap-2">
                           <button 
-                            onClick={() => handleBuyNow(product)} 
-                            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-sm shadow-blue-500/5 text-center"
+                            onClick={() => handleOrderNow(product)} 
+                            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-sm shadow-green-600/5 text-center"
                           >
-                            Buy Now
+                            Order Now
                           </button>
                           <button 
                             onClick={() => handleAddToCart(product)} 
@@ -313,7 +316,7 @@ export default function RidingGearPage() {
             <button className="p-2 bg-[#111319] border border-slate-900 rounded-xl text-slate-500 hover:text-slate-300 transition disabled:opacity-40" disabled>
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <button className="w-8 h-8 bg-blue-500 text-white font-bold text-xs rounded-xl flex items-center justify-center shadow-md shadow-blue-500/10">
+            <button className="w-8 h-8 bg-green-600 text-white font-bold text-xs rounded-xl flex items-center justify-center shadow-md shadow-green-600/10">
               1
             </button>
             <button className="w-8 h-8 bg-[#111319] border border-slate-900 text-slate-400 hover:text-slate-200 font-semibold text-xs rounded-xl flex items-center justify-center transition">
