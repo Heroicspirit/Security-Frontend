@@ -8,6 +8,7 @@ import { handleResetPassword } from "@/lib/actions/auth-action";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import PasswordStrengthIndicator from "@/components/PasswordStrengthIndicator";
 
 const ResetPasswordForm = ({ token }: { token: string }) => {
   const router = useRouter();
@@ -16,9 +17,12 @@ const ResetPasswordForm = ({ token }: { token: string }) => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    watch,
   } = useForm<ResetPasswordData>({
     resolver: zodResolver(resetPasswordSchema),
   });
+
+  const newPassword = watch("newPassword");
 
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -80,6 +84,7 @@ const ResetPasswordForm = ({ token }: { token: string }) => {
             {errors.newPassword.message}
           </p>
         )}
+        <PasswordStrengthIndicator password={newPassword} />
       </div>
 
       {/* Confirm Password */}

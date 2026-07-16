@@ -10,6 +10,7 @@ export const API = {
         MFA_ENABLE: '/api/auth/mfa/enable',
         MFA_VERIFY: '/api/auth/mfa/verify',
         MFA_DISABLE: '/api/auth/mfa/disable',
+        CHECK_PASSWORD_STRENGTH: '/api/auth/check-password-strength',
     },
     PRODUCTS: {
         GET_ALL: '/api/products',
