@@ -6,6 +6,11 @@ export const API = {
         UPDATEPROFILE: '/api/auth/update-profile',
         REQUEST_PASSWORD_RESET: '/api/auth/request-password-reset',
         RESET_PASSWORD: (token: string) => `/api/auth/reset-password/${token}`,
+        MFA_GENERATE_SECRET: '/api/auth/mfa/generate-secret',
+        MFA_ENABLE: '/api/auth/mfa/enable',
+        MFA_VERIFY: '/api/auth/mfa/verify',
+        MFA_DISABLE: '/api/auth/mfa/disable',
+        CHECK_PASSWORD_STRENGTH: '/api/auth/check-password-strength',
     },
     PRODUCTS: {
         GET_ALL: '/api/products',
@@ -15,5 +20,14 @@ export const API = {
         CREATE: '/api/products',
         UPDATE: (id: string) => `/api/products/${id}`,
         DELETE: (id: string) => `/api/products/${id}`,
+    },
+    ORDERS: {
+        CREATE: '/api/orders',
+        GET_ALL: '/api/orders',
+        GET_MY_ORDERS: '/api/orders/my-orders',
+        GET_BY_ID: (id: string) => `/api/orders/${id}`,
+        GET_BY_ORDER_NUMBER: (orderNumber: string) => `/api/orders/order-number/${orderNumber}`,
+        UPDATE_STATUS: (id: string) => `/api/orders/${id}/status`,
+        UPDATE_PAYMENT_STATUS: (id: string) => `/api/orders/${id}/payment-status`,
     },
 }

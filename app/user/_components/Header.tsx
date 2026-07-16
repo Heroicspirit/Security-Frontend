@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Search, ShoppingCart, User } from "lucide-react";
+import { Search, ShoppingCart, User, Settings } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
 const NAV_LINKS = [
@@ -13,7 +13,7 @@ const NAV_LINKS = [
   { href: "/user/roses", label: "Roses" },
 ];
 
-export default function Header() {
+export default function Header({ onOpenMfaSettings }: { onOpenMfaSettings?: () => void }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { cartCount } = useCart();
@@ -81,6 +81,15 @@ export default function Header() {
 
           {/* User */}
           <div className="flex items-center gap-2 border-l border-slate-800 pl-3">
+            {onOpenMfaSettings && (
+              <button
+                onClick={onOpenMfaSettings}
+                className="p-2 text-slate-400 hover:text-white transition"
+                title="Security Settings"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+            )}
             <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300">
               <User className="w-4 h-4" />
             </div>

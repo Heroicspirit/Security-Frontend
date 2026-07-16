@@ -23,7 +23,7 @@ export default function LoginForm() {
 
     if (token) {
       // Store token and redirect
-      document.cookie = `token=${token}; path=/; max-age=2592000`; // 30 days
+      document.cookie = `auth_token=${token}; path=/; max-age=2592000`; // 30 days
       router.replace('/user/dashboard');
     } else if (error === 'google_auth_failed') {
       setServerError('Google authentication failed. Please try again.');

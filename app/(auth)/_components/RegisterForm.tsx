@@ -8,6 +8,7 @@ import { useState, useTransition } from "react";
 import { ArrowRight } from "lucide-react";
 import { registerSchema, type RegisterData } from "../schema";
 import { handleRegister } from "@/lib/actions/auth-action";
+import PasswordStrengthIndicator from "@/components/PasswordStrengthIndicator";
 
 export default function RegisterForm() {
     const router = useRouter();
@@ -18,9 +19,12 @@ export default function RegisterForm() {
         register,
         handleSubmit,
         formState: { errors },
+        watch,
     } = useForm<RegisterData>({
         resolver: zodResolver(registerSchema),
     });
+
+    const password = watch("password");
 
     const onSubmit = async (values: RegisterData) => {
         setServerError(null);
@@ -133,6 +137,7 @@ export default function RegisterForm() {
                             }`}
                         />
                         {errors.password && <p className="text-[11px] text-red-400 font-medium pt-0.5">{errors.password.message}</p>}
+                        <PasswordStrengthIndicator password={password} />
                     </div>
 
                     {/* Confirm Password */}

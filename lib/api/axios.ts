@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getAuthToken } from "../cookie";
+import { getAuthTokenClient } from "../cookie-client";
 
 const BASE_URL = 'http://localhost:5001/';
 const axiosInstance  = axios.create({
@@ -7,8 +7,8 @@ const axiosInstance  = axios.create({
 });
 
 axiosInstance.interceptors.request.use(
-    async (config) => {
-        const token = await getAuthToken();
+    (config) => {
+        const token = getAuthTokenClient();
         if (token) {
             config.headers["Authorization"] = `Bearer ${token}`;
         }

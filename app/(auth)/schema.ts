@@ -1,5 +1,13 @@
 import z from "zod";
 
+const passwordSchema = z.string()
+    .min(8, { message: "Password must be at least 8 characters" })
+    .max(128, { message: "Password must not exceed 128 characters" })
+    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
+    .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
+    .regex(/[0-9]/, { message: "Password must contain at least one number" })
+    .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" });
+
 export const loginSchema = z.object({
     email: z.email({ message: "Enter a valid email" }),
     password: z.string().min(6, { message: "Minimum 6 characters" }),
@@ -10,8 +18,8 @@ export type LoginValue = z.infer<typeof loginSchema>;
 export const registerSchema = z.object({
     name: z.string().min(2, { message: "Enter your name" }),
     email: z.email({ message: "Enter a valid email" }),
-    password: z.string().min(6, { message: "Minimum 6 characters" }),
-    confirmPassword: z.string().min(6, { message: "Minimum 6 characters" }),
+    password: passwordSchema,
+    confirmPassword: z.string().min(8, { message: "Minimum 8 characters" }),
 }).refine((v) => v.password === v.confirmPassword, {
         path: ["confirmPassword"],
         message: "Passwords do not match",
@@ -26,8 +34,8 @@ export type ForgetPasswordData = z.infer<typeof forgetPasswordSchema>;
 
 
 export const resetPasswordSchema = z.object({
-    newPassword: z.string().min(6, { message: "Minimum 6 characters" }),
-    confirmNewPassword: z.string().min(6, { message: "Minimum 6 characters" }),
+    newPassword: passwordSchema,
+    confirmNewPassword: z.string().min(8, { message: "Minimum 8 characters" }),
 }).refine((v) => v.newPassword === v.confirmNewPassword, {
     path: ["confirmNewPassword"],
     message: "Passwords do not match",
