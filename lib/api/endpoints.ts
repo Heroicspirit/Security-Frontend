@@ -21,4 +21,13 @@ export const API = {
         UPDATE: (id: string) => `/api/products/${id}`,
         DELETE: (id: string) => `/api/products/${id}`,
     },
+    ORDERS: {
+        CREATE: '/api/orders',
+        GET_ALL: '/api/orders',
+        GET_MY_ORDERS: '/api/orders/my-orders',
+        GET_BY_ID: (id: string) => `/api/orders/${id}`,
+        GET_BY_ORDER_NUMBER: (orderNumber: string) => `/api/orders/order-number/${orderNumber}`,
+        UPDATE_STATUS: (id: string) => `/api/orders/${id}/status`,
+        UPDATE_PAYMENT_STATUS: (id: string) => `/api/orders/${id}/payment-status`,
+    },
 }
