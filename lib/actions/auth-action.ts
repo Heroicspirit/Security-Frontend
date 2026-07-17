@@ -1,5 +1,5 @@
 "use server"
-import { register, login, whoAmI, updateProfile, requestPasswordReset, resetPassword } from "../api/auth"
+import { register, login, whoAmI, updateProfile, requestPasswordReset, resetPassword, getCaptcha } from "../api/auth"
 import { LoginValue, RegisterData } from "@/app/(auth)/schema";
 import { setAuthToken , setUserData, clearAuthCookies } from "../cookie";
 import {redirect} from "next/navigation";
@@ -131,5 +131,20 @@ export const handleResetPassword = async (token: string, newPassword: string) =>
         return { success: false, message: response.message || 'Reset password failed' }
     } catch (error: Error | any) {
         return { success: false, message: error.message || 'Reset password action failed' }
+    }
+};
+
+export const handleGetCaptcha = async () => {
+    try {
+        const response = await getCaptcha();
+        if (response.success) {
+            return {
+                success: true,
+                data: response.data
+            }
+        }
+        return { success: false, message: response.message || 'Failed to get CAPTCHA' }
+    } catch (error: Error | any) {
+        return { success: false, message: error.message || 'Get CAPTCHA action failed' }
     }
 };

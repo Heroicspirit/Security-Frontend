@@ -117,3 +117,12 @@ export const disableMfa = async () => {
         throw new Error(error.response?.data?.message || error.message || 'Failed to disable MFA');
     }
 }
+
+export const getCaptcha = async () => {
+    try {
+        const response = await axios.get(API.AUTH.CAPTCHA);
+        return response.data;
+    } catch (error: Error | any) {
+        throw new Error(error.response?.data?.message || error.message || 'Failed to get CAPTCHA');
+    }
+}
