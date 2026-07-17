@@ -1,5 +1,5 @@
 "use server"
-import { register, login, whoAmI, updateProfile, requestPasswordReset, resetPassword, getCaptcha } from "../api/auth"
+import { register, login, whoAmI, updateProfile, requestPasswordReset, resetPassword, getCaptcha, exportProfile, importProfile } from "../api/auth"
 import { LoginValue, RegisterData } from "@/app/(auth)/schema";
 import { setAuthToken , setUserData, clearAuthCookies } from "../cookie";
 import {redirect} from "next/navigation";
@@ -146,5 +146,39 @@ export const handleGetCaptcha = async () => {
         return { success: false, message: response.message || 'Failed to get CAPTCHA' }
     } catch (error: Error | any) {
         return { success: false, message: error.message || 'Get CAPTCHA action failed' }
+    }
+};
+
+export const handleExportProfile = async () => {
+    try {
+        const response = await exportProfile();
+        if (response.success) {
+            return {
+                success: true,
+                data: response.data,
+                message: 'Profile exported successfully'
+            }
+        }
+        return { success: false, message: response.message || 'Failed to export profile' }
+    } catch (error: Error | any) {
+        return { success: false, message: error.message || 'Export profile action failed' }
+    }
+};
+
+export const handleImportProfile = async (profileData: { name?: string; profilePicture?: string; favoriteSongs?: any[] }) => {
+    try {
+        const response = await importProfile(profileData);
+        if (response.success) {
+            await setUserData(response.data);
+            revalidatePath('/user/profile');
+            return {
+                success: true,
+                data: response.data,
+                message: 'Profile imported successfully'
+            }
+        }
+        return { success: false, message: response.message || 'Failed to import profile' }
+    } catch (error: Error | any) {
+        return { success: false, message: error.message || 'Import profile action failed' }
     }
 };

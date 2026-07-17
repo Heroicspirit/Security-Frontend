@@ -126,3 +126,21 @@ export const getCaptcha = async () => {
         throw new Error(error.response?.data?.message || error.message || 'Failed to get CAPTCHA');
     }
 }
+
+export const exportProfile = async () => {
+    try {
+        const response = await axios.get(API.AUTH.PROFILE_EXPORT);
+        return response.data;
+    } catch (error: Error | any) {
+        throw new Error(error.response?.data?.message || error.message || 'Failed to export profile');
+    }
+}
+
+export const importProfile = async (profileData: { name?: string; profilePicture?: string; favoriteSongs?: any[] }) => {
+    try {
+        const response = await axios.post(API.AUTH.PROFILE_IMPORT, profileData);
+        return response.data;
+    } catch (error: Error | any) {
+        throw new Error(error.response?.data?.message || error.message || 'Failed to import profile');
+    }
+}

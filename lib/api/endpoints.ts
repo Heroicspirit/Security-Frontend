@@ -12,6 +12,8 @@ export const API = {
         MFA_DISABLE: '/api/auth/mfa/disable',
         CHECK_PASSWORD_STRENGTH: '/api/auth/check-password-strength',
         CAPTCHA: '/api/auth/captcha',
+        PROFILE_EXPORT: '/api/auth/profile/export',
+        PROFILE_IMPORT: '/api/auth/profile/import',
     },
     PRODUCTS: {
         GET_ALL: '/api/products',
