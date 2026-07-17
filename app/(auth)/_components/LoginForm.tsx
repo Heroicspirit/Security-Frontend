@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, RefreshCw } from "lucide-react";
 import { loginSchema, type LoginValue } from "../schema";
-import { handleLogin } from "@/lib/actions/auth-action";
+import { handleLogin, handleGetCaptcha } from "@/lib/actions/auth-action";
 import { useState, useTransition, useEffect } from "react";
 
 export default function LoginForm() {
@@ -14,6 +14,8 @@ export default function LoginForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [captchaData, setCaptchaData] = useState<{ sessionId: string; image: string } | null>(null);
+  const [isLoadingCaptcha, setIsLoadingCaptcha] = useState(false);
 
   // Handle Google OAuth callback
   useEffect(() => {
@@ -28,12 +30,33 @@ export default function LoginForm() {
     } else if (error === 'google_auth_failed') {
       setServerError('Google authentication failed. Please try again.');
     }
-  }, [router]); 
+  }, [router]);
+
+  // Fetch CAPTCHA on component mount
+  useEffect(() => {
+    fetchCaptcha();
+  }, []);
+
+  const fetchCaptcha = async () => {
+    setIsLoadingCaptcha(true);
+    try {
+      const result = await handleGetCaptcha();
+      if (result.success && result.data) {
+        setCaptchaData(result.data);
+        setValue('captchaSessionId', result.data.sessionId);
+      }
+    } catch (error) {
+      console.error('Failed to fetch CAPTCHA:', error);
+    } finally {
+      setIsLoadingCaptcha(false);
+    }
+  }; 
 
   const {
     register,
     handleSubmit,
-    formState: { errors }, 
+    setValue,
+    formState: { errors },
   } = useForm<LoginValue>({
     resolver: zodResolver(loginSchema),
   });
@@ -49,7 +72,7 @@ export default function LoginForm() {
           // Set cookies client-side for immediate access
           document.cookie = `auth_token=${result.token}; path=/; max-age=2592000`;
           document.cookie = `user_data=${encodeURIComponent(JSON.stringify(result.data))}; path=/; max-age=2592000`;
-          
+
           if (result.data?.role === 'admin') {
              router.replace("/admin");
           } else if (result.data?.role === 'user') {
@@ -57,12 +80,16 @@ export default function LoginForm() {
           } else {
              router.replace("/");
           }
-          router.refresh(); 
+          router.refresh();
         } else {
           setServerError(result.message);
+          // Refresh CAPTCHA on failed login
+          fetchCaptcha();
         }
       } catch (error) {
         setServerError("An unexpected error occurred. Please try again.");
+        // Refresh CAPTCHA on error
+        fetchCaptcha();
       }
     });
   };
@@ -120,6 +147,42 @@ export default function LoginForm() {
             </button>
           </div>
           {errors.password && <p className="text-[11px] text-red-400 font-medium pl-1">{errors.password.message}</p>}
+        </div>
+
+        {/* CAPTCHA FIELD */}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Security Verification</label>
+          <div className="flex gap-3">
+            {/* CAPTCHA Image */}
+            <div className="flex-1 bg-[#181d29] rounded-xl border border-slate-800/80 p-3 flex items-center justify-center min-h-[60px]">
+              {isLoadingCaptcha ? (
+                <div className="text-slate-500 text-xs">Loading...</div>
+              ) : captchaData?.image ? (
+                <pre className="text-xs text-slate-300 whitespace-pre-wrap text-center">{captchaData.image}</pre>
+              ) : (
+                <div className="text-slate-500 text-xs">Failed to load CAPTCHA</div>
+              )}
+            </div>
+            {/* Refresh Button */}
+            <button
+              type="button"
+              onClick={fetchCaptcha}
+              disabled={isLoadingCaptcha}
+              className="px-3 py-2 rounded-xl border border-slate-800/80 bg-[#181d29] text-slate-400 hover:text-slate-300 hover:border-slate-700 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-5 h-5 ${isLoadingCaptcha ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+          {/* CAPTCHA Input */}
+          <input
+            {...register("captchaCode")}
+            type="text"
+            placeholder="Enter the code above"
+            className={`w-full px-4 py-3 rounded-xl border bg-[#181d29] text-white outline-none transition-all focus:ring-1 focus:ring-purple-500 focus:border-purple-500 placeholder-slate-600 text-sm ${
+              errors.captchaCode ? "border-red-500/80" : "border-slate-800/80"
+            }`}
+          />
+          {errors.captchaCode && <p className="text-[11px] text-red-400 font-medium pl-1">{errors.captchaCode.message}</p>}
         </div>
 
         {/* REMEMBER ME CHECKBOX */}
