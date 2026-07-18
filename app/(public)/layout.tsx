@@ -32,7 +32,7 @@ export default function PublicLayout({
             </Link>
 
             <a href="#" className="hover:text-white transition">
-              Bouquets
+              bouquets
             </a>
 
             <a href="#" className="hover:text-white transition">

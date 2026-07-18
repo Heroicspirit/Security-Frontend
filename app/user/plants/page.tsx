@@ -74,7 +74,7 @@ export default function PlantsPage() {
       price: parseFloat(product.price),
       quantity: 1
     });
-    router.push('/checkout');
+    router.push('/user/checkout');
   };
 
   const resetFilters = () => {
@@ -310,7 +310,7 @@ export default function PlantsPage() {
                             onClick={() => handleOrderNow(product)} 
                             className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-sm shadow-green-600/5 text-center"
                           >
-                            Order Now
+                            Buy now
                           </button>
                           <button 
                             onClick={() => handleAddToCart(product)} 

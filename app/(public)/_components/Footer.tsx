@@ -9,17 +9,17 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="text-xl font-bold text-white">Flowers</h3>
             <p className="text-sm text-slate-400 leading-relaxed">
-              Premium motorcycle parts and accessories for enthusiasts. Quality you can trust.
+              Premium hand-crafted bouquets, indoor plants, and fresh roses for every occasion. Elegance you can gift.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Shop</h4>
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Shop Collections</h4>
             <ul className="space-y-2">
-              <li><Link href="/user/bikeparts" className="text-sm text-slate-400 hover:text-white transition">Bike Parts</Link></li>
-              <li><Link href="/user/ridinggear" className="text-sm text-slate-400 hover:text-white transition">Riding Gear</Link></li>
-              <li><Link href="/user/tires" className="text-sm text-slate-400 hover:text-white transition">Tires</Link></li>
+              <li><Link href="/user/bouquets" className="text-sm text-slate-400 hover:text-white transition">bouquets</Link></li>
+              <li><Link href="/user/plants" className="text-sm text-slate-400 hover:text-white transition">Plants</Link></li>
+              <li><Link href="/user/roses" className="text-sm text-slate-400 hover:text-white transition">Roses</Link></li>
             </ul>
           </div>
 
@@ -29,8 +29,8 @@ export default function Footer() {
             <ul className="space-y-2">
               <li><Link href="#" className="text-sm text-slate-400 hover:text-white transition">Contact Us</Link></li>
               <li><Link href="#" className="text-sm text-slate-400 hover:text-white transition">FAQs</Link></li>
-              <li><Link href="#" className="text-sm text-slate-400 hover:text-white transition">Shipping Info</Link></li>
-              <li><Link href="#" className="text-sm text-slate-400 hover:text-white transition">Returns</Link></li>
+              <li><Link href="#" className="text-sm text-slate-400 hover:text-white transition">Delivery Info</Link></li>
+              <li><Link href="#" className="text-sm text-slate-400 hover:text-white transition">Care Guide</Link></li>
             </ul>
           </div>
 
@@ -40,7 +40,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li><Link href="#" className="text-sm text-slate-400 hover:text-white transition">Privacy Policy</Link></li>
               <li><Link href="#" className="text-sm text-slate-400 hover:text-white transition">Terms of Service</Link></li>
-              <li><Link href="#" className="text-sm text-slate-400 hover:text-white transition">Cookie Policy</Link></li>
+              <li><Link href="#" className="text-sm text-slate-400 hover:text-white transition">Substitution Policy</Link></li>
             </ul>
           </div>
         </div>
