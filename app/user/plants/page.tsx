@@ -17,6 +17,8 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { getProductsByCategory } from "@/lib/api/products";
 
+const MAX_PRICE = 2000;
+
 export default function PlantsPage() {
   const router = useRouter();
   const { addToCart } = useCart();
@@ -25,6 +27,7 @@ export default function PlantsPage() {
   const [favorites, setFavorites] = useState<(string | number)[]>([]);
   const [showToast, setShowToast] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState<string>("Indoor");
+  const [maxPrice, setMaxPrice] = useState<number>(MAX_PRICE);
 
   useEffect(() => {
     fetchProducts();
@@ -74,11 +77,28 @@ export default function PlantsPage() {
     router.push('/checkout');
   };
 
-  // Filter products by selected plant type (tolerant of missing category or type field)
+  const resetFilters = () => {
+    setSelectedBrand("");
+    setMaxPrice(MAX_PRICE);
+  };
+
+  // Filter products by selected plant type AND current max price range
   const filteredProducts = products.filter((product: any) => {
-    if (!selectedBrand) return true;
-    const targetType = product.type || product.category || "";
-    return targetType.toLowerCase() === selectedBrand.toLowerCase();
+    // 1. Plant Type Filter
+    if (selectedBrand) {
+      const targetType = product.type || product.category || "";
+      if (targetType.toLowerCase() !== selectedBrand.toLowerCase()) {
+        return false;
+      }
+    }
+    
+    // 2. Functional Price Filter
+    const productPrice = parseFloat(product.price) || 0;
+    if (maxPrice < MAX_PRICE && !isNaN(productPrice) && productPrice > maxPrice) {
+      return false;
+    }
+
+    return true;
   });
 
   return (
@@ -137,29 +157,28 @@ export default function PlantsPage() {
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Price Range</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+              <button
+                onClick={resetFilters}
+                className="text-[10px] font-semibold text-emerald-400 hover:text-emerald-300 transition"
+              >
+                Reset
+              </button>
             </div>
             <div className="space-y-2">
-              <div className="h-1 w-full bg-slate-800 rounded-full relative">
-                <div className="absolute inset-y-0 left-0 right-0 bg-green-600/30 rounded-full" />
-              </div>
+              <input
+                type="range"
+                min={0}
+                max={MAX_PRICE}
+                step={25}
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                className="w-full accent-emerald-500 cursor-pointer"
+              />
               <div className="flex justify-between text-[11px] font-medium text-slate-500">
-                <span>Rs 500</span>
-                <span>Rs 15,000+</span>
+                <span>Rs 0</span>
+                <span>{maxPrice >= MAX_PRICE ? `Rs ${MAX_PRICE}+` : `Rs ${maxPrice}`}</span>
               </div>
             </div>
-          </div>
-
-          {/* Pot Size Selector */}
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Pot Size</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-            </div>
-            <button className="w-full bg-[#111319] border border-slate-800/80 rounded-xl px-3 py-2.5 flex items-center justify-between text-xs text-slate-400 hover:border-slate-700 transition">
-              <span>Select Pot Size</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-            </button>
           </div>
 
           {/* Availability Toggle */}
@@ -221,8 +240,6 @@ export default function PlantsPage() {
               {filteredProducts.map((product: any) => {
                 const productId = product._id || product.id;
                 const isFavorite = favorites.includes(productId);
-
-                // Safe fallback for customized tags if dynamic tag is missing
                 const displayTag = product.tag || (product.inStock ? "Best Seller" : "Low Maintenance");
 
                 return (

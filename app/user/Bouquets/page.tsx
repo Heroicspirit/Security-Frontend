@@ -194,18 +194,6 @@ export default function BouquetsPage() {
             </div>
           </div>
 
-          {/* Occasion Dropdown Selector */}
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Occasion</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-            </div>
-            <button className="w-full bg-[#111319] border border-slate-800/80 rounded-xl px-3 py-2.5 flex items-center justify-between text-xs text-slate-400 hover:border-slate-700 transition">
-              <span>Select Occasion</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-            </button>
-          </div>
-
           {/* Availability Toggle options */}
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between">
