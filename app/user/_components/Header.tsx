@@ -8,9 +8,10 @@ import { useCart } from "@/context/CartContext";
 
 const NAV_LINKS = [
   { href: "/user/dashboard", label: "Home" },
-  { href: "/user/bouquets", label: "Bouquets" },
+  { href: "/user/Bouquets", label: "Bouquets" },
   { href: "/user/plants", label: "Plants" },
   { href: "/user/roses", label: "Roses" },
+  { href: "/user/settings", label: "Settings" },
 ];
 
 export default function Header({ onOpenMfaSettings }: { onOpenMfaSettings?: () => void }) {

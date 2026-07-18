@@ -13,7 +13,7 @@ export default function FeaturedCategories() {
         <div className="md:col-span-5 group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/40 to-transparent border border-slate-800 h-[380px] flex items-end p-6">
 
           <img
-            src="https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&q=80"
+            src="/images/flower.jpg"
             alt="Flower Bouquets"
             className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500"
           />
@@ -37,7 +37,7 @@ export default function FeaturedCategories() {
           <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/40 to-transparent border border-slate-800 h-[178px] flex items-end p-6">
 
             <img
-              src="/images/plants.webp"
+              src="/images/plants.jpg"
               alt="Indoor Plants"
               className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500"
             />
@@ -54,7 +54,7 @@ export default function FeaturedCategories() {
           <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/40 to-transparent border border-slate-800 h-[178px] flex items-end p-6">
 
             <img
-              src="https://images.unsplash.com/photo-1609630875171-b1321377ee65?w=800&q=80"
+              src="/images/flower.jpg"
               alt="Fresh Roses"
               className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500"
             />

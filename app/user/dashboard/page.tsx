@@ -76,7 +76,7 @@ export default function UserDashboardPage() {
           <div className="lg:col-span-6 relative flex justify-center">
             <div className="absolute inset-0 bg-green-600/10 blur-[120px] rounded-full max-w-md mx-auto"></div>
             <img 
-              src="/images/flower.webp" 
+              src="/images/flower.jpg" 
               alt="Flower Profile" 
               className="relative rounded-2xl max-h-[450px] object-cover drop-shadow-2xl mix-blend-lighten"
             />
@@ -92,7 +92,7 @@ export default function UserDashboardPage() {
           {/* Big Card: Bouquets */}
           <Link href="/user/Bouquets" className="md:col-span-5 group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/80 to-transparent border border-slate-800 h-[380px] flex items-end p-6 cursor-pointer">
             <img 
-              src="https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&q=80" 
+              src="/images/flower.jpg" 
               alt="Flower Bouquets" 
               className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500 brightness-[0.65]" 
             />
@@ -107,7 +107,7 @@ export default function UserDashboardPage() {
             {/* Top Row: Plants */}
             <Link href="/user/plants" className="group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/80 to-transparent border border-slate-800 h-[178px] flex items-end p-6 cursor-pointer">
               <img 
-                src="/images/plants.webp" 
+                src="/images/plants.jpg" 
                 alt="Indoor Plants" 
                 className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500 brightness-[0.55]" 
               />
@@ -119,7 +119,7 @@ export default function UserDashboardPage() {
             {/* Bottom Row: Roses */}
             <Link href="/user/roses" className="group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/80 to-transparent border border-slate-800 h-[178px] flex items-end p-6 cursor-pointer">
               <img 
-                src="https://images.unsplash.com/photo-1609630875171-b1321377ee65?w=800&q=80" 
+                src="/images/flower.jpg" 
                 alt="Fresh Roses" 
                 className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500 brightness-[0.5]" 
               />

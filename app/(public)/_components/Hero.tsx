@@ -20,7 +20,7 @@ export default function Hero() {
         <div className="lg:col-span-6 relative flex justify-center">
           <div className="absolute inset-0 bg-blue-500/10 blur-[120px] rounded-full max-w-md mx-auto"></div>
           <img 
-            src="/images/flower.webp" 
+            src="/images/flower.jpg" 
             alt="Superbike Profile" 
             className="relative rounded-2xl max-h-[450px] object-cover drop-shadow-2xl mix-blend-lighten"
           />
