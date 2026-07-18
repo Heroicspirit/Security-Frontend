@@ -167,7 +167,7 @@ export default function BouquetsPage() {
           {/* Price Range Section */}
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-3 font-bold text-slate-300 uppercase tracking-wide">Price Range</span>
+              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Price Range</span>
               <button
                 onClick={resetFilters}
                 className="text-[10px] font-semibold text-emerald-400 hover:text-emerald-300 transition"
@@ -192,30 +192,6 @@ export default function BouquetsPage() {
             </div>
           </div>
 
-          {/* Floral Occasion Selector */}
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Occasion</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-            </div>
-            <button className="w-full bg-[#111319] border border-slate-800/80 rounded-xl px-3 py-2.5 flex items-center justify-between text-xs text-slate-400 hover:border-slate-700 transition">
-              <span>Select Occasion</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-            </button>
-          </div>
-
-          {/* Primary Flower Type Selector */}
-          <div className="space-y-3 pt-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wide">Flower Type</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-            </div>
-            <button className="w-full bg-[#111319] border border-slate-800/80 rounded-xl px-3 py-2.5 flex items-center justify-between text-xs text-slate-400 hover:border-slate-700 transition">
-              <span>Select Primary Stem</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-            </button>
-          </div>
-
           {/* Availability Toggle */}
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between">
@@ -229,7 +205,7 @@ export default function BouquetsPage() {
                 onChange={(e) => setInStockOnly(e.target.checked)}
                 className="w-4 h-4 rounded border-slate-800 bg-[#111319] text-emerald-500 focus:ring-0 accent-emerald-500" 
               />
-              <span>Fresh / Available Today</span>
+              <span>In Stock</span>
             </label>
           </div>
         </aside>
@@ -360,7 +336,7 @@ export default function BouquetsPage() {
                           </span>
                         ) : (
                           <span className="inline-block bg-slate-800/60 text-slate-400 text-[10px] font-medium px-2 py-0.5 rounded mt-1">
-                            Available Today
+                            In Stock
                           </span>
                         )}
                       </div>
