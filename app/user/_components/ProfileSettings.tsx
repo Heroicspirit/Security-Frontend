@@ -51,7 +51,7 @@ export default function ProfileSettings() {
 
     try {
       const parsedData = JSON.parse(importData);
-      if (!parsedData.name && !parsedData.profilePicture && !parsedData.favoriteSongs) {
+      if (!parsedData.name && !parsedData.profilePicture) {
         showMessage("error", "Invalid profile data format");
         return;
       }
@@ -188,7 +188,7 @@ export default function ProfileSettings() {
               <textarea
                 value={importData}
                 onChange={(e) => setImportData(e.target.value)}
-                placeholder='{"name": "John Doe", "profilePicture": "...", "favoriteSongs": [...]}'
+                placeholder='{"name": "John Doe", "profilePicture": "..."}'
                 rows={6}
                 className="w-full bg-[#0f1115] border border-slate-800 rounded-lg px-4 py-3 text-sm text-slate-300 font-mono outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none"
               />

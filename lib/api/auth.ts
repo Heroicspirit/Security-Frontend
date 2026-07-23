@@ -143,7 +143,7 @@ export const exportProfile = async () => {
     }
 }
 
-export const importProfile = async (profileData: { name?: string; profilePicture?: string; favoriteSongs?: any[] }) => {
+export const importProfile = async (profileData: { name?: string; profilePicture?: string }) => {
     try {
         const response = await axios.post(API.AUTH.PROFILE_IMPORT, profileData);
         return response.data;

@@ -5,6 +5,7 @@ import { setAuthToken , setUserData, clearAuthCookies } from "../cookie";
 import {redirect} from "next/navigation";
 import { set } from "zod";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 
 
@@ -166,33 +167,66 @@ export const handleGetCaptcha = async () => {
 
 export const handleExportProfile = async () => {
     try {
-        const response = await exportProfile();
-        if (response.success) {
+        // Read auth token from server-side cookie (client-side document.cookie is unavailable in server actions)
+        const cookieStore = await cookies();
+        const token = cookieStore.get("auth_token")?.value;
+
+        if (!token) {
+            return { success: false, message: "Authentication token not found. Please login again." };
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5001'}/api/auth/profile/export`, {
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
             return {
                 success: true,
-                data: response.data,
+                data: data.data,
                 message: 'Profile exported successfully'
             }
         }
-        return { success: false, message: response.message || 'Failed to export profile' }
+        return { success: false, message: data.message || 'Failed to export profile' }
     } catch (error: Error | any) {
         return { success: false, message: error.message || 'Export profile action failed' }
     }
 };
 
-export const handleImportProfile = async (profileData: { name?: string; profilePicture?: string; favoriteSongs?: any[] }) => {
+export const handleImportProfile = async (profileData: { name?: string; profilePicture?: string }) => {
     try {
-        const response = await importProfile(profileData);
-        if (response.success) {
-            await setUserData(response.data);
+        const cookieStore = await cookies();
+        const token = cookieStore.get("auth_token")?.value;
+
+        if (!token) {
+            return { success: false, message: "Authentication token not found. Please login again." };
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5001'}/api/auth/profile/import`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(profileData),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            await setUserData(data.data);
             revalidatePath('/user/profile');
             return {
                 success: true,
-                data: response.data,
+                data: data.data,
                 message: 'Profile imported successfully'
             }
         }
-        return { success: false, message: response.message || 'Failed to import profile' }
+        return { success: false, message: data.message || 'Failed to import profile' }
     } catch (error: Error | any) {
         return { success: false, message: error.message || 'Import profile action failed' }
     }
