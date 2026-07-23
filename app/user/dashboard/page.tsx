@@ -89,41 +89,45 @@ export default function UserDashboardPage() {
         <h2 className="text-2xl font-bold mb-8 text-white">Shop by Category</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Big Card: bouquets */}
-          <Link href="/user/bouquets" className="md:col-span-5 group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/80 to-transparent border border-slate-800 h-[380px] flex items-end p-6 cursor-pointer">
+          {/* Big Card: Bouquets */}
+          <Link href="/user/bouquets" className="md:col-span-5 group relative overflow-hidden rounded-2xl border border-slate-800 h-[380px] flex items-end p-6 cursor-pointer">
             <img 
               src="/images/flower.jpg" 
               alt="Flower bouquets" 
-              className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500 brightness-[0.65]" 
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" 
             />
-            <div className="space-y-1">
-              <h3 className="text-xl font-bold text-white">bouquets</h3>
-              <p className="text-sm text-slate-400">Fresh handcrafted flower bouquets</p>
+            {/* Dark gradient overlay for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+            <div className="relative z-10 space-y-1">
+              <h3 className="text-xl font-bold text-white">Bouquets</h3>
+              <p className="text-sm text-slate-300">Fresh handcrafted flower bouquets</p>
             </div>
           </Link>
 
           {/* Split Container Right */}
           <div className="md:col-span-7 flex flex-col gap-6">
             {/* Top Row: Plants */}
-            <Link href="/user/plants" className="group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/80 to-transparent border border-slate-800 h-[178px] flex items-end p-6 cursor-pointer">
+            <Link href="/user/plants" className="group relative overflow-hidden rounded-2xl border border-slate-800 h-[178px] flex items-end p-6 cursor-pointer">
               <img 
                 src="/images/plants.jpg" 
                 alt="Indoor Plants" 
-                className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500 brightness-[0.55]" 
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" 
               />
-              <div className="space-y-0.5">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="relative z-10 space-y-0.5">
                 <h3 className="text-lg font-bold text-white">Plants</h3>
               </div>
             </Link>
 
             {/* Bottom Row: Roses */}
-            <Link href="/user/roses" className="group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/80 to-transparent border border-slate-800 h-[178px] flex items-end p-6 cursor-pointer">
+            <Link href="/user/roses" className="group relative overflow-hidden rounded-2xl border border-slate-800 h-[178px] flex items-end p-6 cursor-pointer">
               <img 
                 src="/images/flower.jpg" 
                 alt="Fresh Roses" 
-                className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500 brightness-[0.5]" 
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" 
               />
-              <div className="space-y-0.5">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="relative z-10 space-y-0.5">
                 <h3 className="text-lg font-bold text-white">Roses</h3>
               </div>
             </Link>
