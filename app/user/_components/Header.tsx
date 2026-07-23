@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Search, ShoppingCart, User, Settings } from "lucide-react";
+import { Search, ShoppingCart, User, Settings, LogOut } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
 const NAV_LINKS = [
@@ -16,8 +16,27 @@ const NAV_LINKS = [
 
 export default function Header({ onOpenMfaSettings }: { onOpenMfaSettings?: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { cartCount } = useCart();
+
+  const handleLogout = async () => {
+    try {
+      await fetch("http://localhost:5001/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+
+    // Clear client-side cookies
+    document.cookie = "auth_token=; path=/; max-age=0";
+    document.cookie = "user_data=; path=/; max-age=0";
+
+    router.push("/login");
+  };
 
   const isActive = (href: string) => pathname === href;
 
@@ -81,7 +100,7 @@ export default function Header({ onOpenMfaSettings }: { onOpenMfaSettings?: () =
           </Link>
 
           {/* User */}
-          <div className="flex items-center gap-2 border-l border-slate-800 pl-3">
+          <div className="flex items-center gap-2 border-l border-slate-800 pl-3 relative">
             {onOpenMfaSettings && (
               <button
                 onClick={onOpenMfaSettings}
@@ -91,13 +110,36 @@ export default function Header({ onOpenMfaSettings }: { onOpenMfaSettings?: () =
                 <Settings className="w-4 h-4" />
               </button>
             )}
-            <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300">
-              <User className="w-4 h-4" />
-            </div>
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center gap-2 hover:bg-slate-800/50 rounded-lg px-2 py-1 transition"
+            >
+              <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300">
+                <User className="w-4 h-4" />
+              </div>
+              <span className="hidden md:inline text-sm font-medium text-slate-300">
+                Dashboard
+              </span>
+            </button>
 
-            <span className="hidden md:inline text-sm font-medium text-slate-300">
-              Dashboard
-            </span>
+            {/* User Dropdown Menu */}
+            {userMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setUserMenuOpen(false)}
+                />
+                <div className="absolute top-full right-0 mt-2 w-48 bg-[#111319] border border-slate-800 rounded-xl overflow-hidden z-20 shadow-xl">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-3 text-sm font-medium text-slate-300 hover:bg-slate-800/60 transition flex items-center gap-3"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Mobile Button */}

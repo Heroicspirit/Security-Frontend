@@ -27,7 +27,7 @@ const SORT_LABELS: Record<SortOption, string> = {
   priceLow: "Lowest Price",
 };
 
-export default function bouquetsPage() {
+export default function BouquetsPage() {
   const router = useRouter();
   const { addToCart } = useCart();
   const [products, setProducts] = useState<any[]>([]);

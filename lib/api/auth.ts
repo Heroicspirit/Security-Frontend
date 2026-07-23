@@ -2,6 +2,13 @@ import axios from "./axios";
 import { LoginValue, RegisterData } from "@/app/(auth)/schema";
 import {API} from "./endpoints";
 
+interface LoginResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+  token?: string;
+  requiresMfa?: boolean;
+}
 
 export const register = async (registerData: RegisterData)=>{
     try {
@@ -20,13 +27,13 @@ export const register = async (registerData: RegisterData)=>{
 }
 
 
-export const login = async (loginData: LoginValue)=>{
+export const login = async (loginData: LoginValue): Promise<LoginResponse>=>{
     try {
         const response = await axios.post(
-            API.AUTH.LOGIN, 
+            API.AUTH.LOGIN,
             loginData
         );
-        return response.data; 
+        return response.data;
     }catch (err: Error | any){
         throw new Error (
             err.response?.data?.message
