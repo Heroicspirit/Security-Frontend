@@ -27,7 +27,7 @@ const SORT_LABELS: Record<SortOption, string> = {
   priceLow: "Lowest Price",
 };
 
-export default function BouquetsPage() {
+export default function bouquetsPage() {
   const router = useRouter();
   const { addToCart } = useCart();
   const [products, setProducts] = useState<any[]>([]);
@@ -47,12 +47,12 @@ export default function BouquetsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await getProductsByCategory('bouquets');
+      const response = await getProductsByCategory('roses');
       if (response.success) {
         setProducts(response.data || response.products || []);
       }
     } catch (error) {
-      console.error('Failed to fetch bouquets:', error);
+      console.error('Failed to fetch roses:', error);
       setProducts([]);
     } finally {
       setLoading(false);
@@ -77,6 +77,19 @@ export default function BouquetsPage() {
     });
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
+  };
+
+  const handleOrderNow = (product: any) => {
+    if (!product.stock || product.stock <= 0) return;
+
+    addToCart({
+      product: product._id || product.id,
+      title: product.title,
+      image: product.image?.startsWith('http') ? product.image : `http://localhost:5001${product.image}`,
+      price: parseFloat(product.price),
+      quantity: 1
+    });
+    router.push('/user/checkout');
   };
 
   const resetFilters = () => {
@@ -216,7 +229,7 @@ export default function BouquetsPage() {
           {/* List Toolbar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-900">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Handcrafted Bouquets</h1>
+              <h1 className="text-2xl font-bold text-white tracking-tight">Handcrafted bouquets</h1>
               <p className="text-xs text-slate-500 pt-0.5">
                 Showing {sortedProducts.length} of {products.length} elegant arrangements
               </p>
@@ -274,7 +287,7 @@ export default function BouquetsPage() {
                 onClick={resetFilters}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full transition"
               >
-                View All Bouquets
+                View All bouquets
               </button>
             </div>
           )}
@@ -361,9 +374,12 @@ export default function BouquetsPage() {
                               Unavailable
                             </span>
                           ) : (
-                            <Link href={`/user/bouquets/${productId}`} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-sm shadow-emerald-600/5 text-center">
-                              Order Now
-                            </Link>
+                            <button
+                              onClick={() => handleOrderNow(product)}
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-sm shadow-emerald-600/5 text-center"
+                            >
+                              Buy now
+                            </button>
                           )}
                           <button 
                             onClick={() => handleAddToCart(product)} 

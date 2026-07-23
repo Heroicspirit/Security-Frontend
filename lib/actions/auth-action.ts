@@ -43,18 +43,33 @@ export const handleLogin = async (formData : any) =>{
         const result = await login(formData);
 
             if(result.success){
-                await setAuthToken(result.token);
-                await setUserData(result.data);
+                // Check if MFA is required
+                if (result.requiresMfa) {
+                    return {
+                        success : true,
+                        message : 'MFA verification required',
+                        data : result.data,
+                        requiresMfa: true
+                    };
+                }
+
+                if (result.token) {
+                    await setAuthToken(result.token);
+                }
+                if (result.data) {
+                    await setUserData(result.data);
+                }
                 return {
-                    success : true, 
+                    success : true,
                     message : 'Login Successful',
                     data : result.data,
-                    token: result.token
+                    token: result.token,
+                    requiresMfa: false
                 };
             }
 
             return {
-                success : false, 
+                success : false,
                 message : result.message || "Login Failed"
             }
     }catch (err: Error | any){

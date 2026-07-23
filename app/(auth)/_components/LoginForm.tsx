@@ -16,6 +16,9 @@ export default function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const [captchaData, setCaptchaData] = useState<{ sessionId: string; image: string } | null>(null);
   const [isLoadingCaptcha, setIsLoadingCaptcha] = useState(false);
+  const [requiresMfa, setRequiresMfa] = useState(false);
+  const [mfaToken, setMfaToken] = useState("");
+  const [userEmail, setUserEmail] = useState("");
 
   // Handle Google OAuth callback
   useEffect(() => {
@@ -69,6 +72,13 @@ export default function LoginForm() {
         const result = await handleLogin(data);
 
         if (result.success) {
+          // Check if MFA is required
+          if (result.requiresMfa) {
+            setRequiresMfa(true);
+            setUserEmail(data.email);
+            return;
+          }
+
           // Set cookies client-side for immediate access
           document.cookie = `auth_token=${result.token}; path=/; max-age=2592000`;
           document.cookie = `user_data=${encodeURIComponent(JSON.stringify(result.data))}; path=/; max-age=2592000`;
@@ -90,6 +100,60 @@ export default function LoginForm() {
         setServerError("An unexpected error occurred. Please try again.");
         // Refresh CAPTCHA on error
         fetchCaptcha();
+      }
+    });
+  };
+
+  const onMfaSubmit = async () => {
+    setServerError(null);
+
+    if (!mfaToken || mfaToken.length !== 6) {
+      setServerError("Please enter a valid 6-digit MFA code");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const response = await fetch("http://localhost:5001/api/auth/login-mfa-verify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: userEmail,
+            token: mfaToken,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // If MFA was corrupted and auto-reset, redirect to login fresh
+          if (result.mfaReset) {
+            setRequiresMfa(false);
+            setMfaToken("");
+            setUserEmail("");
+            setServerError("Your MFA was corrupted and has been reset. Please log in normally and re-enable MFA from settings.");
+            return;
+          }
+
+          // Set cookies client-side for immediate access
+          document.cookie = `auth_token=${result.token}; path=/; max-age=2592000`;
+          document.cookie = `user_data=${encodeURIComponent(JSON.stringify(result.data))}; path=/; max-age=2592000`;
+
+          if (result.data?.role === 'admin') {
+             router.replace("/admin");
+          } else if (result.data?.role === 'user') {
+             router.replace("/user/dashboard");
+          } else {
+             router.replace("/");
+          }
+          router.refresh();
+        } else {
+          setServerError(result.message);
+        }
+      } catch (error) {
+        setServerError("An unexpected error occurred. Please try again.");
       }
     });
   };
@@ -197,13 +261,48 @@ export default function LoginForm() {
         </div>
 
         {/* SUBMIT BUTTON */}
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm py-3 rounded-xl transition-all shadow-lg shadow-blue-500/10 active:scale-[0.99] disabled:opacity-70 mt-2"
-        >
-          {isPending ? "Logging" : "Login"}
-        </button>
+        {!requiresMfa ? (
+          <button
+            type="submit"
+            disabled={isPending}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm py-3 rounded-xl transition-all shadow-lg shadow-blue-500/10 active:scale-[0.99] disabled:opacity-70 mt-2"
+          >
+            {isPending ? "Logging" : "Login"}
+          </button>
+        ) : (
+          <div className="space-y-4 mt-2">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">MFA Code</label>
+              <input
+                type="text"
+                placeholder="Enter 6-digit code"
+                maxLength={6}
+                value={mfaToken}
+                onChange={(e) => setMfaToken(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border bg-[#181d29] text-white outline-none transition-all focus:ring-1 focus:ring-purple-500 focus:border-purple-500 placeholder-slate-600 text-sm border-slate-800/80 text-center tracking-widest text-lg"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={onMfaSubmit}
+              disabled={isPending}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold text-sm py-3 rounded-xl transition-all shadow-lg shadow-blue-500/10 active:scale-[0.99] disabled:opacity-70"
+            >
+              {isPending ? "Verifying" : "Verify MFA"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setRequiresMfa(false);
+                setMfaToken("");
+                setUserEmail("");
+              }}
+              className="w-full text-slate-400 hover:text-slate-300 text-xs font-medium"
+            >
+              Back to login
+            </button>
+          </div>
+        )}
       </form>
 
       {/* CONTINUITY SEPARATOR */}

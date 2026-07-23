@@ -80,6 +80,19 @@ export default function BouquetsPage() {
     setTimeout(() => setShowToast(false), 3000);
   };
 
+  const handleOrderNow = (product: any) => {
+    if (!product.stock || product.stock <= 0) return;
+
+    addToCart({
+      product: product._id || product.id,
+      title: product.title,
+      image: product.image?.startsWith('http') ? product.image : `http://localhost:5001${product.image}`,
+      price: parseFloat(product.price),
+      quantity: 1
+    });
+    router.push('/user/checkout');
+  };
+
   const resetFilters = () => {
     setSelectedStyle("");
     setMaxPrice(MAX_PRICE);
@@ -218,7 +231,7 @@ export default function BouquetsPage() {
           {/* List Toolbar Actions */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-900">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Handcrafted Bouquets</h1>
+              <h1 className="text-2xl font-bold text-white tracking-tight">Handcrafted bouquets</h1>
               <p className="text-xs text-slate-500 pt-0.5">
                 Showing {sortedProducts.length} of {products.length} arrangements
               </p>
@@ -279,7 +292,7 @@ export default function BouquetsPage() {
                 onClick={resetFilters}
                 className="bg-green-600 hover:bg-green-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full transition"
               >
-                Show All Bouquets
+                Show All bouquets
               </button>
             </div>
           )}
@@ -296,7 +309,7 @@ export default function BouquetsPage() {
                   <div key={productId} className="group bg-[#111319] border border-slate-900 rounded-2xl p-4 flex flex-col justify-between space-y-4 hover:border-slate-800 transition duration-150">
                     
                     {/* Image Section Frame with Action Badge Layering */}
-                    <div className="relative rounded-xl overflow-hidden aspect-square bg-[#0a0c10] flex items-center justify-center">
+                    <Link href={`/user/bouquets/${productId}`} className="relative rounded-xl overflow-hidden aspect-square bg-[#0a0c10] flex items-center justify-center block">
                       {product.tag && (
                         <span className="absolute top-3 left-3 z-10 bg-green-600 text-white text-[9px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">
                           {product.tag}
@@ -324,7 +337,7 @@ export default function BouquetsPage() {
                         alt={product.title} 
                         className={`w-full h-full object-cover brightness-90 group-hover:scale-102 transition duration-300 ${isOutOfStock ? "opacity-40 grayscale" : ""}`}
                       />
-                    </div>
+                    </Link>
 
                     {/* Information content block */}
                     <div className="space-y-3 flex-1 flex flex-col justify-between">
@@ -332,9 +345,11 @@ export default function BouquetsPage() {
                         <span className="text-[10px] font-bold text-slate-500 tracking-wider uppercase">
                           {product.brand}
                         </span>
-                        <h4 className="text-sm font-semibold text-slate-200 line-clamp-2 leading-snug group-hover:text-white transition">
-                          {product.title}
-                        </h4>
+                        <Link href={`/user/bouquets/${productId}`} className="block hover:text-white transition">
+                          <h4 className="text-sm font-semibold text-slate-200 line-clamp-2 leading-snug group-hover:text-white transition">
+                            {product.title}
+                          </h4>
+                        </Link>
                         {isOutOfStock ? (
                           <span className="inline-block bg-rose-950/60 text-rose-400 text-[10px] font-medium px-2 py-0.5 rounded mt-1">
                             Sold Out
@@ -365,9 +380,12 @@ export default function BouquetsPage() {
                               Out of Stock
                             </span>
                           ) : (
-                            <Link href={`/user/bouquets/${productId}`} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-sm shadow-green-600/5 text-center">
-                              Order Now
-                            </Link>
+                            <button
+                              onClick={() => handleOrderNow(product)}
+                              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold text-xs py-2.5 px-4 rounded-xl transition shadow-sm shadow-green-600/5 text-center"
+                            >
+                              Buy now
+                            </button>
                           )}
                           <button 
                             onClick={() => handleAddToCart(product)}

@@ -89,15 +89,15 @@ export default function UserDashboardPage() {
         <h2 className="text-2xl font-bold mb-8 text-white">Shop by Category</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Big Card: Bouquets */}
-          <Link href="/user/Bouquets" className="md:col-span-5 group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/80 to-transparent border border-slate-800 h-[380px] flex items-end p-6 cursor-pointer">
+          {/* Big Card: bouquets */}
+          <Link href="/user/bouquets" className="md:col-span-5 group relative overflow-hidden rounded-2xl bg-gradient-to-t from-black/80 to-transparent border border-slate-800 h-[380px] flex items-end p-6 cursor-pointer">
             <img 
               src="/images/flower.jpg" 
-              alt="Flower Bouquets" 
+              alt="Flower bouquets" 
               className="absolute inset-0 w-full h-full object-cover -z-10 group-hover:scale-105 transition duration-500 brightness-[0.65]" 
             />
             <div className="space-y-1">
-              <h3 className="text-xl font-bold text-white">Bouquets</h3>
+              <h3 className="text-xl font-bold text-white">bouquets</h3>
               <p className="text-sm text-slate-400">Fresh handcrafted flower bouquets</p>
             </div>
           </Link>
