@@ -8,7 +8,7 @@ const files = [
   { src: 'plants.webp', dest: 'plants.jpg' },
 ];
 
-async function convert() {
+async function convert() {dd 
   for (const f of files) {
     const srcPath = path.join(srcDir, f.src);
     const destPath = path.join(srcDir, f.dest);

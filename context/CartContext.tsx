@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth } from "./AuthContext";
 
 interface CartItem {
   product: string;
@@ -23,23 +24,42 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+/**
+ * Returns a user-specific localStorage key so carts don't leak between users.
+ * Uses "cart_guest" when not logged in.
+ */
+function getCartKey(userId?: string): string {
+  return userId ? `cart_${userId}` : 'cart_guest';
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const userId = user?._id || user?.id;
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  // Load cart from localStorage on mount
+  // Build the current localStorage key from user ID
+  const cartKey = getCartKey(userId);
+
+  // Load cart from localStorage whenever the user changes
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
+    const savedCart = localStorage.getItem(cartKey);
     if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
+      try {
+        setCartItems(JSON.parse(savedCart));
+      } catch {
+        setCartItems([]);
+      }
+    } else {
+      setCartItems([]);
     }
-  }, []);
+  }, [cartKey]);
 
-  // Save cart to localStorage whenever it changes
+  // Save cart to localStorage whenever items change (using the user-specific key)
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
-  }, [cartItems]);
+    localStorage.setItem(cartKey, JSON.stringify(cartItems));
+  }, [cartItems, cartKey]);
 
-  const addToCart = (item: CartItem) => {
+  const addToCart = useCallback((item: CartItem) => {
     setCartItems(prev => {
       const existingItem = prev.find(i => i.product === item.product);
       if (existingItem) {
@@ -51,13 +71,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, item];
     });
-  };
+  }, []);
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = useCallback((productId: string) => {
     setCartItems(prev => prev.filter(item => item.product !== productId));
-  };
+  }, []);
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
@@ -67,11 +87,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         item.product === productId ? { ...item, quantity } : item
       )
     );
-  };
+  }, [removeFromCart]);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCartItems([]);
-  };
+    // Also clear from localStorage immediately
+    localStorage.removeItem(cartKey);
+  }, [cartKey]);
 
   const cartTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
