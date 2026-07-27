@@ -10,14 +10,14 @@ export default function Error({
 }) {
 
      useEffect(() => {
-         console.error(error)
+        console.error(error)
      },[error])
 
     return (
         <div>
             <h2>{error.message || "Something went wrong!"}</h2>
             <button onClick={reset}>
-                 Try again
+                Try again
             </button>
         </div>
     );
