@@ -1,9 +1,9 @@
 "use server"
-import { register, login, whoAmI, updateProfile, requestPasswordReset, resetPassword, getCaptcha, exportProfile, importProfile } from "../api/auth"
+import { register, login, whoAmI, updateProfile, requestPasswordReset, resetPassword, exportProfile, importProfile } from "../api/auth"
 import { LoginValue, RegisterData } from "@/app/(auth)/schema";
 import { setAuthToken , setUserData, clearAuthCookies } from "../cookie";
 import {redirect} from "next/navigation";
-import { set } from "zod";
+
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
@@ -152,14 +152,26 @@ export const handleResetPassword = async (token: string, newPassword: string) =>
 
 export const handleGetCaptcha = async () => {
     try {
-        const response = await getCaptcha();
-        if (response.success) {
+        // CAPTCHA is a public endpoint - no auth required.
+        // Server actions run on the server, so we must use fetch directly.
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5001';
+        
+        const response = await fetch(`${baseUrl}/api/auth/captcha`, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+            // Don't send cookies to avoid stale auth tokens interfering
+            credentials: 'omit',
+        });
+        const data = await response.json();
+        
+        if (data.success) {
             return {
                 success: true,
-                data: response.data
+                data: data.data
             }
         }
-        return { success: false, message: response.message || 'Failed to get CAPTCHA' }
+        return { success: false, message: data.message || 'Failed to get CAPTCHA' }
     } catch (error: Error | any) {
         return { success: false, message: error.message || 'Get CAPTCHA action failed' }
     }
