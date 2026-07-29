@@ -150,6 +150,27 @@ export const handleResetPassword = async (token: string, newPassword: string) =>
     }
 };
 
+export const handleCheckCaptchaRequired = async (email: string) => {
+    try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5001';
+        const response = await fetch(`${baseUrl}/api/auth/captcha-required?email=${encodeURIComponent(email)}`, {
+            headers: { "Content-Type": "application/json" },
+            credentials: 'omit',
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            return {
+                success: true,
+                data: data.data
+            }
+        }
+        return { success: false, message: data.message || 'Failed to check CAPTCHA status' }
+    } catch (error: Error | any) {
+        return { success: false, message: error.message || 'Check CAPTCHA action failed' }
+    }
+};
+
 export const handleGetCaptcha = async () => {
     try {
         // CAPTCHA is a public endpoint - no auth required.

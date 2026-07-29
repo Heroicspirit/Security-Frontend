@@ -134,6 +134,17 @@ export const getCaptcha = async () => {
     }
 }
 
+export const checkCaptchaRequired = async (email: string) => {
+    try {
+        const response = await axios.get(API.AUTH.CAPTCHA_REQUIRED, {
+            params: { email }
+        });
+        return response.data;
+    } catch (error: Error | any) {
+        throw new Error(error.response?.data?.message || error.message || 'Failed to check CAPTCHA status');
+    }
+}
+
 export const exportProfile = async () => {
     try {
         const response = await axios.get(API.AUTH.PROFILE_EXPORT);
