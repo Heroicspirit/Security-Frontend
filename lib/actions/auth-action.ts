@@ -120,7 +120,7 @@ export async function handleUpdateProfile(profileData: FormData) {
     }
 };
 
-export const handleRequestPasswordReset = async (data: { email: string; captchaSessionId: string; captchaCode: string }) => {
+export const handleRequestPasswordReset = async (data: { email: string; recaptchaToken: string }) => {
     try {
         const response = await requestPasswordReset(data);
         if (response.success) {
@@ -192,7 +192,7 @@ export const handleGetCaptcha = async () => {
                 data: data.data
             }
         }
-        return { success: false, message: data.message || 'Failed to get CAPTCHA' }
+        return { success: false, message: data.message || 'Failed to get CAPTCHA config' }
     } catch (error: Error | any) {
         return { success: false, message: error.message || 'Get CAPTCHA action failed' }
     }
