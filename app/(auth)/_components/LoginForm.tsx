@@ -6,8 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, Lock, Eye, EyeOff, RefreshCw } from "lucide-react";
 import { loginSchema, type LoginValue } from "../schema";
-import { handleLogin, handleGetCaptcha } from "@/lib/actions/auth-action";
-import { useState, useTransition, useEffect } from "react";
+import { handleLogin, handleGetCaptcha, handleCheckCaptchaRequired } from "@/lib/actions/auth-action";
+import { useState, useTransition, useEffect, useRef } from "react";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -16,14 +16,57 @@ export default function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const [captchaData, setCaptchaData] = useState<{ sessionId: string; image: string } | null>(null);
   const [isLoadingCaptcha, setIsLoadingCaptcha] = useState(false);
+  const [captchaRequired, setCaptchaRequired] = useState(false);
   const [requiresMfa, setRequiresMfa] = useState(false);
   const [mfaToken, setMfaToken] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const emailTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch CAPTCHA on component mount
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<LoginValue>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const emailValue = watch("email");
+
+  // Debounced check: when the user types an email, check if captcha is needed from the server
   useEffect(() => {
-    fetchCaptcha();
-  }, []);
+    if (emailTimeoutRef.current) {
+      clearTimeout(emailTimeoutRef.current);
+    }
+
+    if (emailValue && emailValue.includes('@')) {
+      emailTimeoutRef.current = setTimeout(async () => {
+        try {
+          const result = await handleCheckCaptchaRequired(emailValue);
+          if (result.success && result.data?.required) {
+            setCaptchaRequired(true);
+            fetchCaptcha();
+          } else {
+            setCaptchaRequired(false);
+            setCaptchaData(null);
+          }
+        } catch {
+          // Silently fail — captcha check is non-critical
+        }
+      }, 500);
+    }
+
+    return () => {
+      if (emailTimeoutRef.current) {
+        clearTimeout(emailTimeoutRef.current);
+      }
+    };
+  }, [emailValue]);
 
   const fetchCaptcha = async () => {
     setIsLoadingCaptcha(true);
@@ -32,6 +75,7 @@ export default function LoginForm() {
       if (result.success && result.data) {
         setCaptchaData(result.data);
         setValue('captchaSessionId', result.data.sessionId);
+        setCaptchaRequired(true);
       }
     } catch (error) {
       console.error('Failed to fetch CAPTCHA:', error);
@@ -39,15 +83,6 @@ export default function LoginForm() {
       setIsLoadingCaptcha(false);
     }
   }; 
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<LoginValue>({
-    resolver: zodResolver(loginSchema),
-  });
 
   const onSubmit = async (data: LoginValue) => {
     setServerError(null);
@@ -78,12 +113,14 @@ export default function LoginForm() {
           router.refresh();
         } else {
           setServerError(result.message);
-          // Refresh CAPTCHA on failed login
+          // Failed login — require captcha on retry
+          setCaptchaRequired(true);
           fetchCaptcha();
         }
       } catch (error) {
         setServerError("An unexpected error occurred. Please try again.");
-        // Refresh CAPTCHA on error
+        // On error, also require captcha
+        setCaptchaRequired(true);
         fetchCaptcha();
       }
     });
@@ -198,41 +235,43 @@ export default function LoginForm() {
           {errors.password && <p className="text-[11px] text-red-400 font-medium pl-1">{errors.password.message}</p>}
         </div>
 
-        {/* CAPTCHA FIELD */}
-        <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Security Verification</label>
-          <div className="flex gap-3">
-            {/* CAPTCHA Image */}
-            <div className="flex-1 bg-[#181d29] rounded-xl border border-slate-800/80 p-3 flex items-center justify-center min-h-[60px]">
-              {isLoadingCaptcha ? (
-                <div className="text-slate-500 text-xs">Loading...</div>
-              ) : captchaData?.image ? (
-                <pre className="text-xs text-slate-300 whitespace-pre-wrap text-center">{captchaData.image}</pre>
-              ) : (
-                <div className="text-slate-500 text-xs">Failed to load CAPTCHA</div>
-              )}
+        {/* CAPTCHA FIELD — only shown when required */}
+        {captchaRequired && (
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Security Verification</label>
+            <div className="flex gap-3">
+              {/* CAPTCHA Image */}
+              <div className="flex-1 bg-[#181d29] rounded-xl border border-slate-800/80 p-3 flex items-center justify-center min-h-[60px]">
+                {isLoadingCaptcha ? (
+                  <div className="text-slate-500 text-xs">Loading...</div>
+                ) : captchaData?.image ? (
+                  <pre className="text-xs text-slate-300 whitespace-pre-wrap text-center">{captchaData.image}</pre>
+                ) : (
+                  <div className="text-slate-500 text-xs">Failed to load CAPTCHA</div>
+                )}
+              </div>
+              {/* Refresh Button */}
+              <button
+                type="button"
+                onClick={fetchCaptcha}
+                disabled={isLoadingCaptcha}
+                className="px-3 py-2 rounded-xl border border-slate-800/80 bg-[#181d29] text-slate-400 hover:text-slate-300 hover:border-slate-700 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={`w-5 h-5 ${isLoadingCaptcha ? 'animate-spin' : ''}`} />
+              </button>
             </div>
-            {/* Refresh Button */}
-            <button
-              type="button"
-              onClick={fetchCaptcha}
-              disabled={isLoadingCaptcha}
-              className="px-3 py-2 rounded-xl border border-slate-800/80 bg-[#181d29] text-slate-400 hover:text-slate-300 hover:border-slate-700 transition-colors disabled:opacity-50"
-            >
-              <RefreshCw className={`w-5 h-5 ${isLoadingCaptcha ? 'animate-spin' : ''}`} />
-            </button>
+            {/* CAPTCHA Input */}
+            <input
+              {...register("captchaCode")}
+              type="text"
+              placeholder="Enter the code above"
+              className={`w-full px-4 py-3 rounded-xl border bg-[#181d29] text-white outline-none transition-all focus:ring-1 focus:ring-purple-500 focus:border-purple-500 placeholder-slate-600 text-sm ${
+                errors.captchaCode ? "border-red-500/80" : "border-slate-800/80"
+              }`}
+            />
+            {errors.captchaCode && <p className="text-[11px] text-red-400 font-medium pl-1">{errors.captchaCode.message}</p>}
           </div>
-          {/* CAPTCHA Input */}
-          <input
-            {...register("captchaCode")}
-            type="text"
-            placeholder="Enter the code above"
-            className={`w-full px-4 py-3 rounded-xl border bg-[#181d29] text-white outline-none transition-all focus:ring-1 focus:ring-purple-500 focus:border-purple-500 placeholder-slate-600 text-sm ${
-              errors.captchaCode ? "border-red-500/80" : "border-slate-800/80"
-            }`}
-          />
-          {errors.captchaCode && <p className="text-[11px] text-red-400 font-medium pl-1">{errors.captchaCode.message}</p>}
-        </div>
+        )}
 
         {/* REMEMBER ME CHECKBOX */}
         <div className="flex items-center pt-0.5">

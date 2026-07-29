@@ -12,6 +12,7 @@ export const API = {
         MFA_DISABLE: '/api/auth/mfa/disable',
         CHECK_PASSWORD_STRENGTH: '/api/auth/check-password-strength',
         CAPTCHA: '/api/auth/captcha',
+        CAPTCHA_REQUIRED: '/api/auth/captcha-required',
         PROFILE_EXPORT: '/api/auth/profile/export',
         PROFILE_IMPORT: '/api/auth/profile/import',
     },

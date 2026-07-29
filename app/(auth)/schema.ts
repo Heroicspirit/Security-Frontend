@@ -9,10 +9,10 @@ const passwordSchema = z.string()
     .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" });
 
 export const loginSchema = z.object({
-    email: z.email({ message: "Enter a valid email" }),
+    email: z.string().min(1, { message: "Email is required" }).email({ message: "Enter a valid email" }),
     password: z.string().min(6, { message: "Minimum 6 characters" }),
-    captchaSessionId: z.string().min(1, { message: "CAPTCHA session ID is required" }),
-    captchaCode: z.string().min(1, { message: "CAPTCHA code is required" }),
+    captchaSessionId: z.string().optional(),
+    captchaCode: z.string().optional(),
 });
 
 export type LoginValue = z.infer<typeof loginSchema>;
@@ -30,7 +30,9 @@ export const registerSchema = z.object({
 export type RegisterData = z.infer<typeof registerSchema>;
 
 export const forgetPasswordSchema = z.object({
-    email: z.email({ message: "Enter a valid email" }),
+    email: z.string().email({ message: "Enter a valid email" }),
+    captchaSessionId: z.string().min(1, { message: "CAPTCHA session ID is required" }),
+    captchaCode: z.string().min(1, { message: "CAPTCHA code is required" }),
 });
 export type ForgetPasswordData = z.infer<typeof forgetPasswordSchema>;
 

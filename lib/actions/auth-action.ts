@@ -120,9 +120,9 @@ export async function handleUpdateProfile(profileData: FormData) {
     }
 };
 
-export const handleRequestPasswordReset = async (email: string) => {
+export const handleRequestPasswordReset = async (data: { email: string; captchaSessionId: string; captchaCode: string }) => {
     try {
-        const response = await requestPasswordReset(email);
+        const response = await requestPasswordReset(data);
         if (response.success) {
             return {
                 success: true,
@@ -147,6 +147,27 @@ export const handleResetPassword = async (token: string, newPassword: string) =>
         return { success: false, message: response.message || 'Reset password failed' }
     } catch (error: Error | any) {
         return { success: false, message: error.message || 'Reset password action failed' }
+    }
+};
+
+export const handleCheckCaptchaRequired = async (email: string) => {
+    try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5001';
+        const response = await fetch(`${baseUrl}/api/auth/captcha-required?email=${encodeURIComponent(email)}`, {
+            headers: { "Content-Type": "application/json" },
+            credentials: 'omit',
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            return {
+                success: true,
+                data: data.data
+            }
+        }
+        return { success: false, message: data.message || 'Failed to check CAPTCHA status' }
+    } catch (error: Error | any) {
+        return { success: false, message: error.message || 'Check CAPTCHA action failed' }
     }
 };
 
