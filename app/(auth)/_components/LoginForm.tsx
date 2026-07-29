@@ -4,23 +4,26 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Mail, Lock, Eye, EyeOff, RefreshCw } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { loginSchema, type LoginValue } from "../schema";
 import { handleLogin, handleGetCaptcha, handleCheckCaptchaRequired } from "@/lib/actions/auth-action";
-import { useState, useTransition, useEffect, useRef } from "react";
+import { useState, useTransition, useEffect, useRef, useCallback } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function LoginForm() {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [captchaData, setCaptchaData] = useState<{ sessionId: string; image: string } | null>(null);
-  const [isLoadingCaptcha, setIsLoadingCaptcha] = useState(false);
+  const [siteKey, setSiteKey] = useState<string>('');
+  const [isLoadingSiteKey, setIsLoadingSiteKey] = useState(false);
+  const [siteKeyError, setSiteKeyError] = useState(false);
   const [captchaRequired, setCaptchaRequired] = useState(false);
   const [requiresMfa, setRequiresMfa] = useState(false);
   const [mfaToken, setMfaToken] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const emailTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA | null>(null);
 
   const {
     register,
@@ -38,6 +41,30 @@ export default function LoginForm() {
 
   const emailValue = watch("email");
 
+  // Pre-fetch the reCAPTCHA site key from backend on mount so it's ready when needed
+  const fetchSiteKey = useCallback(async () => {
+    setIsLoadingSiteKey(true);
+    setSiteKeyError(false);
+    try {
+      const result = await handleGetCaptcha();
+      if (result.success && result.data?.siteKey) {
+        setSiteKey(result.data.siteKey);
+      } else {
+        setSiteKeyError(true);
+      }
+    } catch {
+      console.error('Failed to fetch reCAPTCHA site key');
+      setSiteKeyError(true);
+    } finally {
+      setIsLoadingSiteKey(false);
+    }
+  }, []);
+
+  // Fetch site key on mount so it's always ready
+  useEffect(() => {
+    fetchSiteKey();
+  }, [fetchSiteKey]);
+
   // Debounced check: when the user types an email, check if captcha is needed from the server
   useEffect(() => {
     if (emailTimeoutRef.current) {
@@ -50,10 +77,10 @@ export default function LoginForm() {
           const result = await handleCheckCaptchaRequired(emailValue);
           if (result.success && result.data?.required) {
             setCaptchaRequired(true);
-            fetchCaptcha();
+            // siteKey is already being pre-fetched on mount
           } else {
             setCaptchaRequired(false);
-            setCaptchaData(null);
+            setValue('recaptchaToken', '');
           }
         } catch {
           // Silently fail — captcha check is non-critical
@@ -66,26 +93,33 @@ export default function LoginForm() {
         clearTimeout(emailTimeoutRef.current);
       }
     };
-  }, [emailValue]);
+  }, [emailValue, setValue]);
 
-  const fetchCaptcha = async () => {
-    setIsLoadingCaptcha(true);
-    try {
-      const result = await handleGetCaptcha();
-      if (result.success && result.data) {
-        setCaptchaData(result.data);
-        setValue('captchaSessionId', result.data.sessionId);
-        setCaptchaRequired(true);
-      }
-    } catch (error) {
-      console.error('Failed to fetch CAPTCHA:', error);
-    } finally {
-      setIsLoadingCaptcha(false);
+  const handleRecaptchaChange = (token: string | null) => {
+    setValue('recaptchaToken', token || '');
+  };
+
+  const resetRecaptcha = () => {
+    if (recaptchaRef.current) {
+      recaptchaRef.current.reset();
     }
-  }; 
+    setValue('recaptchaToken', '');
+  };
 
   const onSubmit = async (data: LoginValue) => {
     setServerError(null);
+
+    // If captcha is required, validate its state before proceeding
+    if (captchaRequired) {
+      if (siteKeyError) {
+        setServerError("CAPTCHA service is unavailable. Please refresh the page or try again later.");
+        return;
+      }
+      if (!data.recaptchaToken) {
+        setServerError("Please complete the CAPTCHA verification.");
+        return;
+      }
+    }
 
     startTransition(async () => {
       try {
@@ -115,13 +149,17 @@ export default function LoginForm() {
           setServerError(result.message);
           // Failed login — require captcha on retry
           setCaptchaRequired(true);
-          fetchCaptcha();
+          resetRecaptcha();
+          // Only re-fetch site key if we don't already have it
+          if (!siteKey) fetchSiteKey();
         }
       } catch (error) {
         setServerError("An unexpected error occurred. Please try again.");
         // On error, also require captcha
         setCaptchaRequired(true);
-        fetchCaptcha();
+        resetRecaptcha();
+        // Only re-fetch site key if we don't already have it
+        if (!siteKey) fetchSiteKey();
       }
     });
   };
@@ -235,43 +273,32 @@ export default function LoginForm() {
           {errors.password && <p className="text-[11px] text-red-400 font-medium pl-1">{errors.password.message}</p>}
         </div>
 
-        {/* CAPTCHA FIELD — only shown when required */}
+        {/* reCAPTCHA FIELD — only shown when required */}
         {captchaRequired && (
           <div className="space-y-2">
             <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Security Verification</label>
-            <div className="flex gap-3">
-              {/* CAPTCHA Image */}
-              <div className="flex-1 bg-[#181d29] rounded-xl border border-slate-800/80 p-3 flex items-center justify-center min-h-[60px]">
-                {isLoadingCaptcha ? (
-                  <div className="text-slate-500 text-xs">Loading...</div>
-                ) : captchaData?.image ? (
-                  <pre className="text-xs text-slate-300 whitespace-pre-wrap text-center">{captchaData.image}</pre>
-                ) : (
-                  <div className="text-slate-500 text-xs">Failed to load CAPTCHA</div>
-                )}
+            {isLoadingSiteKey ? (
+              <div className="flex justify-center bg-[#181d29] rounded-xl border border-slate-800/80 p-6">
+                <div className="animate-pulse flex flex-col items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-slate-700"></div>
+                  <div className="text-xs text-slate-500">Loading CAPTCHA...</div>
+                </div>
               </div>
-              {/* Refresh Button */}
-              <button
-                type="button"
-                onClick={fetchCaptcha}
-                disabled={isLoadingCaptcha}
-                className="px-3 py-2 rounded-xl border border-slate-800/80 bg-[#181d29] text-slate-400 hover:text-slate-300 hover:border-slate-700 transition-colors disabled:opacity-50"
-              >
-                <RefreshCw className={`w-5 h-5 ${isLoadingCaptcha ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
-            {/* CAPTCHA Input */}
-            <input
-              {...register("captchaCode")}
-              type="text"
-              placeholder="Enter the code above"
-              className={`w-full px-4 py-3 rounded-xl border bg-[#181d29] text-white outline-none transition-all focus:ring-1 focus:ring-purple-500 focus:border-purple-500 placeholder-slate-600 text-sm ${
-                errors.captchaCode ? "border-red-500/80" : "border-slate-800/80"
-              }`}
-            />
-            {errors.captchaCode && <p className="text-[11px] text-red-400 font-medium pl-1">{errors.captchaCode.message}</p>}
-          </div>
-        )}
+            ) : siteKeyError ? (
+              <div className="flex justify-center bg-[#181d29] rounded-xl border border-red-500/20 p-4">
+                <p className="text-xs text-red-400">Failed to load CAPTCHA. Please try again later.</p>
+              </div>            ) : siteKey ? (
+              <div className="flex justify-center bg-[#181d29] rounded-xl border border-slate-800/80 p-3">
+                <ReCAPTCHA
+                  ref={recaptchaRef}
+                  sitekey={siteKey}
+                  onChange={handleRecaptchaChange}
+                  theme="dark"
+                />
+              </div>
+            ) : null}
+            {errors.recaptchaToken && <p className="text-[11px] text-red-400 font-medium pl-1">{errors.recaptchaToken.message}</p>}
+          </div>        )}
 
         {/* REMEMBER ME CHECKBOX */}
         <div className="flex items-center pt-0.5">

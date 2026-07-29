@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { forgetPasswordSchema, ForgetPasswordData } from "../schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,46 +7,61 @@ import Link from "next/link";
 import { handleRequestPasswordReset, handleGetCaptcha } from "@/lib/actions/auth-action";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { RefreshCw } from "lucide-react";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const ForgetPasswordForm = () => {
     const router = useRouter();
     const [pending, setTransition] = useTransition();
-    const [captchaData, setCaptchaData] = useState<{ sessionId: string; image: string } | null>(null);
-    const [isLoadingCaptcha, setIsLoadingCaptcha] = useState(false);
+    const [siteKey, setSiteKey] = useState<string>('');
+    const recaptchaRef = useRef<ReCAPTCHA | null>(null);
 
     const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<ForgetPasswordData>({
         mode: "onSubmit",
         resolver: zodResolver(forgetPasswordSchema),
+        defaultValues: {
+            email: "",
+            recaptchaToken: "",
+        }
     });
 
-    // Fetch CAPTCHA on component mount
-    const fetchCaptcha = async () => {
-        setIsLoadingCaptcha(true);
+    // Fetch the reCAPTCHA site key from backend on mount
+    const fetchSiteKey = useCallback(async () => {
         try {
             const result = await handleGetCaptcha();
-            if (result.success && result.data) {
-                setCaptchaData(result.data);
-                setValue('captchaSessionId', result.data.sessionId);
+            if (result.success && result.data?.siteKey) {
+                setSiteKey(result.data.siteKey);
             }
         } catch (error) {
-            console.error('Failed to fetch CAPTCHA:', error);
-        } finally {
-            setIsLoadingCaptcha(false);
+            console.error('Failed to fetch reCAPTCHA site key:', error);
         }
-    };
-
-    useEffect(() => {
-        fetchCaptcha();
     }, []);
 
+    useEffect(() => {
+        fetchSiteKey();
+    }, [fetchSiteKey]);
+
+    const handleRecaptchaChange = (token: string | null) => {
+        setValue('recaptchaToken', token || '');
+    };
+
+    const resetRecaptcha = () => {
+        if (recaptchaRef.current) {
+            recaptchaRef.current.reset();
+        }
+        setValue('recaptchaToken', '');
+    };
+
     const submit = (values: ForgetPasswordData) => {
+        if (!values.recaptchaToken) {
+            toast.error("Please complete the CAPTCHA verification.");
+            return;
+        }
+
         setTransition(async () => {
             try {
                 const result = await handleRequestPasswordReset({
                     email: values.email,
-                    captchaSessionId: values.captchaSessionId,
-                    captchaCode: values.captchaCode,
+                    recaptchaToken: values.recaptchaToken,
                 });
                 if (result.success) {
                     toast.success("If the email is registered, a reset link has been sent.");
@@ -56,8 +71,8 @@ const ForgetPasswordForm = () => {
                 }
             } catch (err: Error | any) {
                 toast.error(err.message || 'Failed to send reset link');
-                // Refresh CAPTCHA on error
-                fetchCaptcha();
+                // Reset reCAPTCHA on error
+                resetRecaptcha();
             }
         })
     }
@@ -86,38 +101,23 @@ const ForgetPasswordForm = () => {
                 )}
             </div>
 
-            {/* CAPTCHA Section */}
-            <div className="space-y-2">
-                <label className="text-sm font-medium">Security Verification</label>
-                <div className="flex gap-2">
-                    <div className="flex-1 bg-gray-50 rounded-md border border-black/20 p-3 flex items-center justify-center min-h-[50px]">
-                        {isLoadingCaptcha ? (
-                            <span className="text-xs text-gray-400">Loading...</span>
-                        ) : captchaData?.image ? (
-                            <pre className="text-xs text-gray-600 whitespace-pre-wrap text-center font-mono">{captchaData.image}</pre>
-                        ) : (
-                            <span className="text-xs text-gray-400">Failed to load CAPTCHA</span>
-                        )}
+            {/* Google reCAPTCHA Section */}
+            {siteKey && (
+                <div className="space-y-2">
+                    <label className="text-sm font-medium">Security Verification</label>
+                    <div className="flex justify-center bg-gray-50 rounded-md border border-black/20 p-3">
+                        <ReCAPTCHA
+                            ref={recaptchaRef}
+                            sitekey={siteKey}
+                            onChange={handleRecaptchaChange}
+                        />
                     </div>
-                    <button
-                        type="button"
-                        onClick={fetchCaptcha}
-                        disabled={isLoadingCaptcha}
-                        className="px-3 py-2 rounded-md border border-black/20 bg-white text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-colors disabled:opacity-50"
-                    >
-                        <RefreshCw className={`w-5 h-5 ${isLoadingCaptcha ? 'animate-spin' : ''}`} />
-                    </button>
+                    <input type="hidden" {...register("recaptchaToken")} />
+                    {errors.recaptchaToken?.message && (
+                        <p className="text-xs text-red-600">{errors.recaptchaToken.message}</p>
+                    )}
                 </div>
-                <input
-                    {...register("captchaCode")}
-                    type="text"
-                    placeholder="Enter the code above"
-                    className="h-10 w-full rounded-md border border-black/20 bg-white text-black placeholder:text-black/40 px-3 text-sm outline-none focus:border-black focus:ring-1 focus:ring-black/30"
-                />
-                {errors.captchaCode?.message && (
-                    <p className="text-xs text-red-600">{errors.captchaCode.message}</p>
-                )}
-            </div>
+            )}
 
             <button
                 type="submit"
