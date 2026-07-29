@@ -120,9 +120,9 @@ export async function handleUpdateProfile(profileData: FormData) {
     }
 };
 
-export const handleRequestPasswordReset = async (email: string) => {
+export const handleRequestPasswordReset = async (data: { email: string; captchaSessionId: string; captchaCode: string }) => {
     try {
-        const response = await requestPasswordReset(email);
+        const response = await requestPasswordReset(data);
         if (response.success) {
             return {
                 success: true,

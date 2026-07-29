@@ -71,9 +71,9 @@ export const updateProfile = async (profileData: any) => {
   }
 };
 
-export const requestPasswordReset = async (email: string) => {
+export const requestPasswordReset = async (data: { email: string; captchaSessionId: string; captchaCode: string }) => {
     try {
-        const response = await axios.post(API.AUTH.REQUEST_PASSWORD_RESET, { email });
+        const response = await axios.post(API.AUTH.REQUEST_PASSWORD_RESET, data);
         return response.data;
     } catch (error: Error | any) {
         throw new Error(error.response?.data?.message || error.message || 'Request password reset failed');

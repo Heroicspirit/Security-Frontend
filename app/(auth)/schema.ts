@@ -30,7 +30,9 @@ export const registerSchema = z.object({
 export type RegisterData = z.infer<typeof registerSchema>;
 
 export const forgetPasswordSchema = z.object({
-    email: z.email({ message: "Enter a valid email" }),
+    email: z.string().email({ message: "Enter a valid email" }),
+    captchaSessionId: z.string().min(1, { message: "CAPTCHA session ID is required" }),
+    captchaCode: z.string().min(1, { message: "CAPTCHA code is required" }),
 });
 export type ForgetPasswordData = z.infer<typeof forgetPasswordSchema>;
 
